@@ -33,12 +33,6 @@ server {
     try_files $uri $uri/ @tilecache;
   }
 
-  upstream openstreetmap_backend {
-    server  a.tile.openstreetmap.org;
-    server  b.tile.openstreetmap.org;
-    server  c.tile.openstreetmap.org;
-  }
-
   location @tilecache {
     include tileproxy_params;
     proxy_set_header X_FORWARDED_PROTO http;
