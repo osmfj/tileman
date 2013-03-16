@@ -23,11 +23,14 @@ server {
     try_files $uri $uri/ @tilecache;
   }
 
+  upstream openstreetmap_backend {
+    server  a.tile.openstreetmap.org;
+    server  b.tile.openstreetmap.org;
+    server  c.tile.openstreetmap.org;
+  }
+
   location @tilecache {
-    proxy_pass        http://tile.openstreetmap.org ;
-    proxy_cache       tilecache;
-    proxy_cache_key "$scheme$host$request_uri";
-    proxy_cache_valid  200 302  300h;
-    proxy_cache_valid  404      1m;
+    include tileproxy_params;
+    proxy_pass http://openstreetmap_backend;
   }
 }

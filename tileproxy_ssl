@@ -1,47 +1,47 @@
 # HTTPS server
 #
 server {
-	listen 443;
-  	server_name *.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  listen 443;
+  server_name *.tile.openstreetmap.jp *.tile.openstreetmap.org;
 
-  	access_log  /var/log/nginx/tiles_access.log combined;
-  	error_log   /var/log/nginx/tiles_error.log info;
+  access_log  /var/log/nginx/tiles_ssl_access.log combined;
+  error_log   /var/log/nginx/tiles_ssl_error.log info;
 
-        location = /favicon.ico {
-                log_not_found off;
-                access_log off;
-        }
 
-	ssl on;
-	ssl_certificate  /etc/ssl/certs/tile_cert.pem;
-	ssl_certificate_key  /etc/ssl/private/tile_privatekey.pem;
-	ssl_session_timeout  5m;
+  ssl on;
+  ssl_certificate  /etc/ssl/certs/tile_cert.pem;
+  ssl_certificate_key  /etc/ssl/private/tile_privatekey.pem;
+  ssl_session_timeout  5m;
 
-	ssl_protocols SSLv3 TLSv1;
-	ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
-	ssl_prefer_server_ciphers on;
+  ssl_protocols SSLv3 TLSv1;
+  ssl_ciphers  ALL:!ADH:!EXPORT56:RC4+RSA:+HIGH:+MEDIUM:+LOW:+SSLv2:+EXP;
+  ssl_prefer_server_ciphers on;
 
-        location = /robots.txt {
-                allow all;
-                log_not_found off;
-                access_log off;
-        }
+  location = /favicon.ico {
+     log_not_found off;
+     access_log off;
+  }
 
-	location ~* ^/munin/ {
-		root /var/cache/munin/www;
-		rewrite ^/munin/(.*)$ /$1 break;
-		access_log off;
-		expires 5m;
-		#auth_basic "Restricted Area";
-		#auth_basic_user_file htpasswd;
-	}
-
+  location = /robots.txt {
+     allow all;
+     log_not_found off;
+     access_log off;
+  }
 
   location / {
-    proxy_pass        http://tile.openstreetmap.org/ ;
-    proxy_cache       tilecache;
-    proxy_cache_key "$scheme$host$request_uri";
-    proxy_cache_valid  200 302  300h;
-    proxy_cache_valid  404      1m;
+    root /var/www/tiles;
+    try_files $uri $uri/ @tilecache;
+  }
+
+  upstream openstreetmap_backend {
+    server  a.tile.openstreetmap.org;
+    server  b.tile.openstreetmap.org;
+    server  c.tile.openstreetmap.org;
+  }
+
+  location @tilecache {
+    include tileproxy_params;
+    proxy_set_header X_FORWARDED_PROTO http;
+    proxy_pass http://openstreetmap_backend;
   }
 }
