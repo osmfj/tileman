@@ -1,6 +1,6 @@
 server {
-  listen 157.7.134.126:80;
-  server_name tile.openstreetmap.jp tile.osm.jp *.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  listen 80;
+  server_name tile tile.openstreetmap.jp tile.osm.jp *.tile.openstreetmap.jp *.tile.openstreetmap.org;
 
   root   /var/www;
 
@@ -19,7 +19,68 @@ server {
   }
 
   location / {
-    root /var/www/tiles;
+    root /var/cache/tile;
+
+    access_by_lua '
+      if ngx.var.uri:sub(-4) ~= ".png" then
+        -- just try files
+        return 
+      end
+
+      local captures = "/(%d+)/(%d+)/(%d+).png"
+      local s,_,z,x,y = ngx.var.uri:find(captures)
+      if s == nil then
+        return
+        -- ngx.exit(ngx.HTTP_NOT_FOUND)
+      end
+
+      ngx.var.x = x
+      ngx.var.y = y
+      ngx.var.z = z
+
+      local redis = require "resty.redis"
+      local red = redis:new()
+
+      red:set_timeout(1000) -- 1 sec
+
+      -- please check permission
+      -- local ok, err = red:connect("unix:/var/run/redis/redis.sock")
+
+      local ok, err = red:connect("127.0.0.1", 6379)
+      if not ok then
+        -- cannot connect redis server
+        ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+      end
+
+      --    key; val 
+      -- avail  "a:x:y:z" ;  expiry
+      -- requested "r:x:y:z"; last requested time
+
+      local kindex = string.format("%d:%d:%d",x,y,z)
+      local res, err = red:get("a:"..kindex)
+
+
+      if not res then
+        ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+      end
+      if res == ngx.null then
+         -- no record exist
+         -- ask backend to render it if capable
+         local ok, err = red:set("r:"..kindex, os.time())
+         if not ok then
+           ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+         end
+      end
+      if res == true then
+         -- tile should be refreshed now
+         -- call renderd with x/y/z here
+      end
+
+      -- put it into the connection pool of size 100,
+      -- with 0 idle timeout
+      local ok, err = red:set_keepalive(0, 100)
+    ';
+
     try_files $uri $uri/ @tilecache;
   }
 
