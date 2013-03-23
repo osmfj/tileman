@@ -1,6 +1,6 @@
 server {
   listen 80;
-  server_name tile tile.openstreetmap.jp tile.osm.jp *.tile.openstreetmap.org *.tile.openstreetmap.org;
+  server_name tile tile.openstreetmap.jp tile.osm.jp *.tile.openstreetmap.jp *.tile.openstreetmap.org;
 
   root   /var/www;
 
