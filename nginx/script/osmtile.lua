@@ -4,14 +4,18 @@
 -- requisite: lua-resty-redis, socket
 --
       if ngx.var.uri:sub(-4) ~= ".png" then
-        return 
+        ngx.exit(ngx.HTTP_FORBIDDEN)
       end
 
       local captures = "/(%d+)/(%d+)/(%d+).png"
       local s,_,z,x,y = ngx.var.uri:find(captures)
       if s == nil then
-        return
-        -- ngx.exit(ngx.HTTP_NOT_FOUND)
+        ngx.exit(ngx.HTTP_NOT_FOUND)
+      end
+
+      if ngx.var.own_tile == 'no' then
+        ngx.log(ngx.INFO, "skip tilegen")
+        return ngx.exec("@tilecache")
       end
 
       local redis = require "resty.redis"
