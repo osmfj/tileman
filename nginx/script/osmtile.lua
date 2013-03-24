@@ -14,7 +14,6 @@
       end
 
       if ngx.var.own_tile == 'no' then
-        ngx.log(ngx.INFO, "skip tilegen")
         return ngx.exec("@tilecache")
       end
 
