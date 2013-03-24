@@ -1,0 +1,8 @@
+Ubuntu raring has lua-nginx-rasty-redis package. Older release don't have.
+Here is a package for convenience to maintain server.
+
+You can get recent package from 
+https://launchpad.net/ubuntu/+source/lua-nginx-redis/0.15-1
+
+upstream project  
+https://github.com/agentzh/lua-resty-redis
