@@ -18,7 +18,7 @@ server {
   }
 
   location / {
-    access_by_lua_file tilecache.lua; 
+    access_by_lua_file /etc/nginx/script/osmtile.lua; 
     root /var/cache/tile;
     try_files $uri $uri/ @tilecache;
   }
