@@ -3,6 +3,9 @@
 --
 -- requisite: lua-resty-redis, socket
 --
+      local minz = 0
+      local maxz = 19
+
       if ngx.var.uri:sub(-4) ~= ".png" then
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
@@ -15,6 +18,10 @@
 
       if ngx.var.own_tile == 'no' then
         return ngx.exec("@tilecache")
+      end
+
+      if (z < minz) or (z > maxz) then
+        ngx.exit(ngx.HTTP_FORBIDDEN)
       end
 
       local redis = require "resty.redis"
@@ -56,6 +63,8 @@
           end
         end
      end
+
+     ngx.shared.stats:incr("http_requests", 1)
 
      if ares == ngx.null then
        -- no record exist
