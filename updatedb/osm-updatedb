@@ -1,0 +1,111 @@
+#!/bin/bash
+#
+# osm-updatedb
+#
+# Get osm changes and update PostGIS database
+# osmosis configuration should be in $WORKER_DIR
+#
+# Licensed in GPLv3
+# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+#
+# ----------------------------
+# ChnageLog
+#
+# ----------------------------
+#
+NAME=osm-updatedb
+# Read configuration variable file if it is present
+[ -r "/etc/${NAME}.conf" ] && . "/etc/${NAME}.conf"
+
+
+WORKDIR_OSM=/var/opt/osmosis
+DBUSER=osm
+DBNAME=gis
+OSMOSIS_BIN=/opt/osmosis/bin/osmosis
+OSM2PGSQL_BIN=/usr/bin/osm2pgsql
+PSQL_BIN=/usr/bin/psql
+EXPIRE_ZOOM=15
+
+OSC_PIPE=/tmp/changes_osc.$$
+EXPIRE_PIPE=/tmp/expire_list.$$
+
+EXPIRE_FILE=$WORKDIR_OSM/expire.list
+OSMOSIS_OPT="--read-replication-interval workingDirectory=$WORKDIR_OSM --simplify-change --write-xml-change"
+DB_OPT="-U $DBUSER -d $DBNAME"
+OSM2PGSQL_OPT="--append $DB_OPT --slim -a -e${EXPIRE_ZOOM}"
+
+function cleanup_bbbox () {
+    $PSQL_BIN $DB_OPT -w << _EOL_
+      DELETE FROM planet_osm_ways AS w WHERE 0 = (SELECT COUNT(1) FROM planet_osm_nodes AS n WHERE n.id = ANY(w.nodes));
+      DELETE FROM planet_osm_rels AS r WHERE 
+         0=(SELECT COUNT(1) FROM planet_osm_nodes AS n WHERE n.id = ANY(r.parts)) 
+         AND
+         0=(SELECT COUNT(1) FROM planet_osm_ways AS w WHERE w.id = ANY(r.parts));
+      REINDEX TABLE planet_osm_ways;
+      REINDEX TABLE planet_osm_rels;
+      VACUUM;
+_EOL_
+}
+
+function check_exec () {
+  if [ ! -x $OSMOSIS_BIN ] ; then
+     echo "Error: $OSMOSIS_BIN doesn't exist."
+     echo
+     exit 1
+  elif [ ! -x $PSQL_BIN ] ; then
+     echo "Error: $PSQL_BIN doesn't exist."
+     echo
+     exit 1
+  elif [ ! -x $OSM2PGSQL_BIN ] ; then
+     echo "Error: $OSM2PGSQL_BIN doesn't exist."
+     echo
+     exit 1
+  fi
+}
+
+function parse_options () {
+  while getopts "bcdhv" opts; do
+    case $opts in 
+    c)
+    CLEAN_FLAG=yes
+    ;;
+    b)
+    CLEAN_OUTOFBB_FLAG=yes
+    ;;
+    d)
+    DEBUG_FLAG=yes
+    ;;
+    h)
+    #show help and exit
+    echo "$0: get osm change file and update postgis db"
+    echo " "
+    echo "It takes addtional options as follows: "
+    echo "'-b': clwan-up out-of-bounding-box ways"
+    echo "'-c': compact size of PostGIS."
+    echo "'-d': show debug messages"
+    echo "'-v': show version"
+    exit 0
+    ;;
+    v)
+    echo "$0: get osm change file and update postgis db"
+    exit 0
+    ;;
+    esac
+  done
+  shift $((OPTIND - 1))
+}
+
+
+parse_options
+check_exec
+mkfifo $OSC_PIPE
+mkfifo $EXPIRE_PIPE
+$OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
+$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE
+rm -f $OSC_PIPE
+rm -f $EXPIRE_PIPE
+if [ "${CLEAN_OUTOFBB_FLAG}" = "yes" ]; then
+  cleanup_bbox()
+fi
+
+exit 0

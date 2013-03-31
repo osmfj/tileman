@@ -5,13 +5,22 @@ Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
 - Nginx Web server
--- Lua embeded scripting 
--- File Cache
+
+  - Lua embeded scripting 
+
+  - File Cache
+
 - Redis Key-Value store database
--- Lua resty redis driver
-- renderd, rendering backend
+
+ - Lua resty redis driver
+
+- Tirex, rendering backend
+
 - PostGIS
+
 - osm2pgsql
+
+- osmosis
 
 This recipe is intended to run on Ubuntu 11.10(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
@@ -57,6 +66,38 @@ http://wiki.openstreetmap.org/wiki/Tile_expire_methods
 
 We need to process it and update Redis KVS db expressed for tile expiry.
 
+planet import
+---
+
+The directory updatedb has an incremental update script for osm data.
+
+Reference
+--
+
+
+- http://svn.openstreetmap.org/applications/utils/tirex/tileserver/tileserver.js
+
+- http://wiki.openstreetmap.org/wiki/User:Stephankn/knowledgebase#Cleanup_of_ways_outside_the_bounding_box
+
+Sever environment
+==
+
+* Mapnik2.2
+
+you can get mapnik 2.2.0 from 
+
+- https://launchpad.net/~mapnik/+archive/nightly-trunk/+packages
+
+You can build most recent mapnik
+
+- https://github.com/mapnik/mapnik-packaging/tree/master/debian-nightlies
+
+
+* Tirex
+
+Please follow an instraction  here:
+
+- http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
 
 To-dos
 --
