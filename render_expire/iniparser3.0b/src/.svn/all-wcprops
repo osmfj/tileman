@@ -1,0 +1,29 @@
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/!svn/ver/15799/applications/utils/mod_tile/iniparser3.0b/src
+END
+dictionary.h
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/!svn/ver/15799/applications/utils/mod_tile/iniparser3.0b/src/dictionary.h
+END
+iniparser.c
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/!svn/ver/15799/applications/utils/mod_tile/iniparser3.0b/src/iniparser.c
+END
+iniparser.h
+K 25
+svn:wc:ra_dav:version-url
+V 73
+/!svn/ver/15799/applications/utils/mod_tile/iniparser3.0b/src/iniparser.h
+END
+dictionary.c
+K 25
+svn:wc:ra_dav:version-url
+V 74
+/!svn/ver/15799/applications/utils/mod_tile/iniparser3.0b/src/dictionary.c
+END
