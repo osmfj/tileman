@@ -34,7 +34,7 @@ OSMOSIS_OPT="--read-replication-interval workingDirectory=$WORKDIR_OSM --simplif
 DB_OPT="-U $DBUSER -d $DBNAME"
 OSM2PGSQL_OPT="--append $DB_OPT --slim -a -e${EXPIRE_ZOOM}"
 
-function cleanup_bbbox () {
+function cleanup_bbox () {
     $PSQL_BIN $DB_OPT -w << _EOL_
       DELETE FROM planet_osm_ways AS w WHERE 0 = (SELECT COUNT(1) FROM planet_osm_nodes AS n WHERE n.id = ANY(w.nodes));
       DELETE FROM planet_osm_rels AS r WHERE 
@@ -63,8 +63,8 @@ function check_exec () {
   fi
 }
 
-function parse_options () {
-  while getopts "bcdhv" opts; do
+
+while getopts "bcdhv" opts; do
     case $opts in 
     c)
     CLEAN_FLAG=yes
@@ -91,12 +91,10 @@ function parse_options () {
     exit 0
     ;;
     esac
-  done
-  shift $((OPTIND - 1))
-}
+done
+shift $((OPTIND - 1))
 
 
-parse_options
 check_exec
 mkfifo $OSC_PIPE
 mkfifo $EXPIRE_PIPE
@@ -105,7 +103,7 @@ $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE
 rm -f $OSC_PIPE
 rm -f $EXPIRE_PIPE
 if [ "${CLEAN_OUTOFBB_FLAG}" = "yes" ]; then
-  cleanup_bbox()
+  cleanup_bbox
 fi
 
 exit 0
