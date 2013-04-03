@@ -18,7 +18,6 @@ server {
   }
 
   location / {
-    lua_shared_dict stats 10m;
     access_by_lua_file /etc/nginx/script/osmtile.lua; 
     root /var/cache/tile;
     try_files $uri $uri/ @tilecache;
