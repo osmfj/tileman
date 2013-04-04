@@ -1,0 +1,34 @@
+server {
+  listen 80;
+  server_name tileserver j.tile.openstreetmap.jp k.tile.openstreetmap.jp;
+  root   /var/www;
+
+  access_log  /var/log/nginx/tileserver_access.log combined;
+  error_log   /var/log/nginx/tileserver_error.log info;
+
+  location = /favicon.ico {
+        log_not_found off;
+        access_log off;
+  }
+
+  location = /robots.txt {
+        allow all;
+        log_not_found off;
+        access_log off;
+  }
+
+  location / {
+    access_by_lua_file /etc/nginx/script/tilecheck.lua; 
+    root /var/opt/tileserver/static;
+    try_files $uri $uri/ @tileserver;
+  }
+
+  location @tileserver {
+    content_by_lua_file /etc/nginx/script/tileserver.lua; 
+  }
+
+  location @tilecache {
+    include tileproxy_params;
+    proxy_pass http://openstreetmap_backend;
+  }
+}
