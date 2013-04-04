@@ -7,5 +7,5 @@ mkdir -p $NGINX/script/
 install script/* $NGINX/script/
 install sites/* $NGINX/sites-available/
 
-ln -s $NGINX/site-available/tileproxy $NGINX/site-enabled/tileproxy
-ln -s $NGINX/site-available/tileproxy_ssl $NGINX/site-enabled/tileproxy_ssl
+ln -s $NGINX/sites-available/tileproxy $NGINX/sites-enabled/tileproxy
+ln -s $NGINX/sites-available/tileproxy_ssl $NGINX/sites-enabled/tileproxy_ssl
