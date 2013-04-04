@@ -87,17 +87,20 @@ Install
 上記実行環境を整えたあと、
 
     $ git clone git://github.com/osmfj/tilecache.git
-    $ cd pkgs
-    $ sudo dpkg -i lua-nginx-redis_0.15-1_all.deb
-      これで、redisにアクセスできる環境ができます。このパッケージは
-　    Ubuntu raringからしか提供されていないので、同梱されています。
     $ cd tilecache
+    $ (cd pkgs; sudo dpkg -i lua-nginx-redis_0.15-1_all.deb)
+
+これで、redisにアクセスできる環境ができます。このパッケージはUbuntu raringからしか提供されていないので、同梱されています。
+
     $ (cd nginx; sudo ./install.sh)
-      これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
+    
+これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
+
     $ cd render_expire
     $ make
     $ sudo make install
-      これで、render_expireが/opt/tileserver/bin に導入されます。
+
+これで、render_expireが/opt/tileserver/bin に導入されます。
 
 External Links
 ===============
