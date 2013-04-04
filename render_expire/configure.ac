@@ -3,8 +3,8 @@
 
 AC_PREREQ([2.61])
 AX_CONFIG_NICE
-AC_INIT(mod_tile, 0.1, http://trac.openstreetmap.org)
-AM_INIT_AUTOMAKE(mod_tile,0.1)
+AC_INIT(tilecache, 0.1, https://github.com/osmfj/tileproxy)
+AM_INIT_AUTOMAKE(tileproxy,0.1)
 LT_INIT
 AC_CONFIG_SRCDIR([render_expired.c])
 AC_CONFIG_HEADERS([config.h])
@@ -32,12 +32,8 @@ AC_TYPE_UINT64_T
 AC_FUNC_MALLOC
 AC_FUNC_MKTIME
 
-AC_CHECK_FT2
 AX_PTHREAD(,[AC_MSG_ERROR([no])])
 AC_SEARCH_LIBS(pow,m)
-AX_BOOST_BASE
-AC_CHECK_ICU(4.2)
-AX_LIB_MAPNIK
 AC_CHECK_FUNCS([bzero gettimeofday memset mkdir pow strchr strdup strerror strrchr strstr strtol strtoul utime],[],[AC_MSG_ERROR([One of the required functions was not found])])
 
 AC_CONFIG_FILES(Makefile iniparser3.0b/Makefile)
