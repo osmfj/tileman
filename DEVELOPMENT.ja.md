@@ -46,16 +46,6 @@ Ver 1.0
 * 生成されたタイル画像ファイルは、ファイルシステムに格納されます。
 * nginxサーバとTirexは、UDPソケット通信でコマンドをやり取りします。
 
-mod_tile相当とは
-----
-* 独自タイル生成を、リクエストに応じて、on the flyで実施します。
-* データベースの更新にあわせて、古くなったタイル画像を削除し、
-　再度生成されるようにします。
-* タイル画像が古い（expire)の場合でも、レスポンスを確保するため
-　古いタイルを返送するが、httpでの画像の有効期間を再生成に
-　必要な時間を動的に計算して、設定します。
-　ユーザが再度表示しようとすると、新しいタイルになります。　
-
 Ver 2.0
 ----
 
@@ -70,42 +60,53 @@ Ver 3.0
 
 * Redis KVSへタイル格納します。
 
+mod_tile相当とは
+----
+* 独自タイル生成を、リクエストに応じて、on the flyで実施します。
+* データベースの更新にあわせて、古くなったタイル画像を削除し、
+　再度生成されるようにします。
+* タイル画像が古い（expire)の場合でも、レスポンスを確保するため
+　古いタイルを返送するが、httpでの画像の有効期間を再生成に
+　必要な時間を動的に計算して、設定します。
+　ユーザが再度表示しようとすると、新しいタイルになります。　
+
 
 Running environment
 =============
-環境は、Ubuntu 11.10(64bit)です。
-Nightly buildのmapnikを使っています。[*5]
-nginxは、nginx-extra packageを使います。
-luaからredisデータベースへのアクセスは、OpenRestyのLua-redis[*6]
-モジュールを使います。
-Tirexは、ドキュメントに従ってmake debして、パッケージを導入します。[*7]
-redis-server パッケージを導入します。
+
+* 環境は、Ubuntu 11.10(64bit)です。
+* Nightly buildのmapnikを使っています。[*5]
+* nginxは、nginx-extra packageを使います。
+* luaからredisデータベースへのアクセスは、OpenRestyのLua-redis[*6]モジュールを使います。
+* Tirexは、ドキュメントに従ってmake debして、パッケージを導入します。[*7]
+* redis-server パッケージを導入します。
 
 Install
 ==========
 
 上記実行環境を整えたあと、
-$ git clone git://github.com/osmfj/tilecache.git
-$ cd pkgs
-$ sudo dpkg -i lua-nginx-redis_0.15-1_all.deb
-   これで、redisにアクセスできる環境ができます。このパッケージは
-　Ubuntu raringからしか提供されていないので、同梱されています。
-$ cd tilecache
-$ (cd nginx; sudo ./install.sh)
-  これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
-$ cd render_expire
-$ make
-$ sudo make install
-  これで、render_expireが/opt/tileserver/bin に導入されます。
+
+    $ git clone git://github.com/osmfj/tilecache.git
+    $ cd pkgs
+    $ sudo dpkg -i lua-nginx-redis_0.15-1_all.deb
+      これで、redisにアクセスできる環境ができます。このパッケージは
+　    Ubuntu raringからしか提供されていないので、同梱されています。
+    $ cd tilecache
+    $ (cd nginx; sudo ./install.sh)
+      これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
+    $ cd render_expire
+    $ make
+    $ sudo make install
+      これで、render_expireが/opt/tileserver/bin に導入されます。
 
 External Links
 ===============
 
-[*0] https://github.com/osmfj/tilecache
-[*1] http://wiki.openstreetmap.org/wiki/Mod_tile
-[*2] http://wiki.openstreetmap.org/wiki/Tirex
-[*3] http://wiki.openstreetmap.org/wiki/Mapnik
-[*4] http://nginx.org/ja/
-[*5] https://launchpad.net/~mapnik/+archive/nightly-trunk
-[*6] https://github.com/agentzh/lua-resty-redis
-[*7] http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
+* [*0] https://github.com/osmfj/tilecache
+* [*1] http://wiki.openstreetmap.org/wiki/Mod_tile
+* [*2] http://wiki.openstreetmap.org/wiki/Tirex
+* [*3] http://wiki.openstreetmap.org/wiki/Mapnik
+* [*4] http://nginx.org/ja/
+* [*5] https://launchpad.net/~mapnik/+archive/nightly-trunk
+* [*6] https://github.com/agentzh/lua-resty-redis
+* [*7] http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
