@@ -99,7 +99,10 @@ check_exec
 mkfifo $OSC_PIPE
 mkfifo $EXPIRE_PIPE
 $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
-$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE
+$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE &
+# XXX: here is a stub for expire tool
+cat $EXPIRE_PIPE > /dev/null
+# XXX: should replace with render_expire
 rm -f $OSC_PIPE
 rm -f $EXPIRE_PIPE
 if [ "${CLEAN_OUTOFBB_FLAG}" = "yes" ]; then
