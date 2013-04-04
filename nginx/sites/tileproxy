@@ -1,10 +1,10 @@
 server {
   listen 80;
-  server_name tile tile.openstreetmap.jp tile.osm.jp *.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  server_name tile tile.openstreetmap.jp a.tile.openstreetmap.jp b.tile.openstreetmap.jp *.tile.openstreetmap.org;
   root   /var/www;
 
-  access_log  /var/log/nginx/tiles_access.log combined;
-  error_log   /var/log/nginx/tiles_error.log info;
+  access_log  /var/log/nginx/tileproxy_access.log combined;
+  error_log   /var/log/nginx/tileproxy_error.log info;
 
   location = /favicon.ico {
         log_not_found off;
@@ -18,12 +18,7 @@ server {
   }
 
   location / {
-    access_by_lua_file /etc/nginx/script/osmtile.lua; 
-    root /var/cache/tile;
-    try_files $uri $uri/ @tilecache;
-  }
-
-  location @tilecache {
+    access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;
   }

@@ -2,11 +2,10 @@
 #
 server {
   listen 443;
-  server_name *.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  server_name a.tile.openstreetmap.jp b.tile.openstreetmap.jp *.tile.openstreetmap.org;
 
-  access_log  /var/log/nginx/tiles_ssl_access.log combined;
-  error_log   /var/log/nginx/tiles_ssl_error.log info;
-
+  access_log  /var/log/nginx/tileproxy_ssl_access.log combined;
+  error_log   /var/log/nginx/tileproxy_ssl_error.log info;
 
   ssl on;
   ssl_certificate  /etc/ssl/certs/tile_cert.pem;
@@ -29,12 +28,7 @@ server {
   }
 
   location / {
-    access_by_lua_file /etc/nginx/script/osmtile.lua; 
-    root /var/cache/tile;
-    try_files $uri $uri/ @tilecache;
-  }
-
-  location @tilecache {
+    access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     include tileproxy_params;
     proxy_set_header X_FORWARDED_PROTO http;
     proxy_pass http://openstreetmap_backend;
