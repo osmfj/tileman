@@ -19,6 +19,11 @@ server {
 
   location / {
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
+    access_by_lua '
+      if ngx.var.own_tile == 'no' then
+        return ngx.exec("@tilecache")
+      end
+      ';
     root /var/opt/tileserver/static;
     try_files $uri $uri/ @tileserver;
   }

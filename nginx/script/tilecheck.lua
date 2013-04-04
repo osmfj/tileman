@@ -16,10 +16,6 @@ if s == nil then
   ngx.exit(ngx.HTTP_NOT_FOUND)
 end
 
-if ngx.var.own_tile == 'no' then
-  return ngx.exec("@tilecache")
-end
-
 if (tonumber(z) < minz) or (tonumber(z) > maxz) then
   ngx.exit(ngx.HTTP_FORBIDDEN)
 end
