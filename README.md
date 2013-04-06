@@ -27,7 +27,7 @@ useful for other platform and who want to run osm tile server.
 
 Install
 --
-[Install development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Install-development-environment-using-Vagrant)
+[Setup development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Setup-development-environment-using-Vagrant)
 
 License
 -- 
