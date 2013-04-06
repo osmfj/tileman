@@ -14,17 +14,17 @@
 # ----------------------------
 #
 NAME=osm-updatedb
+CONF=osmdb.conf
 # Read configuration variable file if it is present
-[ -r "/etc/${NAME}.conf" ] && . "/etc/${NAME}.conf"
+[ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
-
-WORKDIR_OSM=/var/opt/osmosis
-DBUSER=osm
-DBNAME=gis
-OSMOSIS_BIN=/opt/osmosis/bin/osmosis
-OSM2PGSQL_BIN=/usr/bin/osm2pgsql
-PSQL_BIN=/usr/bin/psql
-EXPIRE_ZOOM=15
+${WORKDIR_OSM:=/var/opt/osmosis}
+${DBUSER:=osm}
+${DBNAME:=gis}
+${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
+${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
+${PSQL_BIN:=/usr/bin/psql}
+${EXPIRE_ZOOM:=15}
 
 OSC_PIPE=/tmp/changes_osc.$$
 EXPIRE_PIPE=/tmp/expire_list.$$
@@ -99,10 +99,7 @@ check_exec
 mkfifo $OSC_PIPE
 mkfifo $EXPIRE_PIPE
 $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
-$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE &
-# XXX: here is a stub for expire tool
-cat $EXPIRE_PIPE > /dev/null
-# XXX: should replace with render_expire
+$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
 rm -f $OSC_PIPE
 rm -f $EXPIRE_PIPE
 if [ "${CLEAN_OUTOFBB_FLAG}" = "yes" ]; then

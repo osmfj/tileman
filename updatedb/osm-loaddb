@@ -1,0 +1,41 @@
+#!/bin/sh
+#
+NAME=osm-loaddb
+CONF=osmdb.conf
+# Read configuration variable file if it is present
+[ -r "/etc/${CONF}" ] && . "/etc/${CONF}.conf"
+
+${WORKDIR_OSM:=/var/opt/osmosis}
+${DBUSER:=osm}
+${DBNAME:=gis}
+${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
+${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
+${PSQL_BIN:=/usr/bin/psql}
+
+#DBPASS=
+
+${MEMSIZE:=6096}
+${PROCESS_NUM:=6}
+
+${STYLEFILE:=/usr/share/osm2pgsql/default.style}
+
+${ORIGIN:=geofabrik} # or planet
+${REGION:=asia}
+${COUNTRY:=japan}
+
+OPTIONS="-c -d $DBNAME -U $DBUSER -m -C $MEMSIZE --drop --hstore --slim --number-processes $PROCESS_NUM -S $STYLEFILE "
+if [ ! "$DBPASS" = "" ] ; then
+OPTIONS+=" -p $DBPASS "
+fi
+
+if [ "$ORIGIN" = "geofabrik"] ; then
+  wget http://download.geofabrik.de/$REGION/$COUNTRY-updates/state.txt
+  cp state.txt $WORKDIR_OSM/
+  wget http://download.geofabrik.de/$REGION/$COUNTRY-latest.osm.pbf
+  /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
+else
+  wget http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
+  cp state.txt $WORKDIR_OSM/
+  wget http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+  /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+fi
