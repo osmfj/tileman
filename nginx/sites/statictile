@@ -20,7 +20,7 @@ server {
   location / {
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     access_by_lua '
-      if ngx.var.own_tile == 'no' then
+      if ngx.var.own_tile == "no" then
         return ngx.exec("@tilecache")
       end
       ';
