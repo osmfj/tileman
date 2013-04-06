@@ -25,6 +25,10 @@ This recipe is intended to run on Ubuntu 11.10(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
 
 
+Install
+--
+[Installation development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Installation-development-environment-using-Vagrant)
+
 License
 -- 
 
