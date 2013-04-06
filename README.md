@@ -66,6 +66,22 @@ The directory updatedb has an incremental update script and primary load script
 for osm data.
 It is now defaults geofabrik data and also supposed to use planet.osm.org data. 
 
+
+Data
+====
+
+This distribution includes several tile images.
+
+It can be used to replace some tiles,  where some country law request to 
+display specific name.
+
+There are several places where multiple laws in countries requires incoherent 
+rules, such as administration claims.
+
+A nginx configuration, statictile provides a solution for these case.
+For details, please refer doc/statictile.ja.txt
+
+
 Reference
 --
 
