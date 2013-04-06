@@ -77,9 +77,20 @@ Running environment
 * 環境は、Ubuntu 11.10(64bit)です。
 * Nightly buildのmapnikを使っています。[*5]
 * nginxは、nginx-extra packageを使います。
+* Osmosis は、Wiki[*8]からLatest Stable Versionをダウンロードし、/opt/osmosisに展開します。
 * luaからredisデータベースへのアクセスは、OpenRestyのLua-redis[*6]モジュールを使います。
 * Tirexは、ドキュメントに従ってmake debして、パッケージを導入します。[*7]
-* redis-server パッケージを導入します。
+* redis-server パッケージを導入します。(apt-get install redis-server)
+* 必要なdirectoryを掘ります。
+
+参考 Mapnik2.2ビルド
+---
+
+最新版のmapnikをgit等で取り寄せて、パッケージをつくるときは、
+パッケージ生成用のツールがあるので、参考にすると良い。
+
+- https://github.com/mapnik/mapnik-packaging/tree/master/debian-nightlies
+
 
 Install
 ==========
@@ -99,8 +110,22 @@ Install
     $ cd render_expire
     $ make
     $ sudo make install
+    $ cd ..
 
 これで、render_expireが/opt/tileserver/bin に導入されます。
+
+
+
+Directories
+=============
+
+    /home/tilecache ... tile cache directory for nginx, 要書き込み権限　
+    /opt/tileserver ... application directory
+    /opt/osmosis    ... osmosisのバイナリを展開する
+    /opt/tileserver/bin/ lib/ share/  locate application bin/data
+    /var/opt/tileserver ... locate application output, rendered tiles
+    /var/opt/osmosis ... osmosisの設定や状態　要書き込み権限 osmosisで
+
 
 External Links
 ===============
@@ -113,3 +138,5 @@ External Links
 * [*5] https://launchpad.net/~mapnik/+archive/nightly-trunk
 * [*6] https://github.com/agentzh/lua-resty-redis
 * [*7] http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
+* [*8] http://wiki.openstreetmap.org/wiki/Osmosis
+

@@ -10,10 +10,6 @@ It uses following technologies.
 
   - File Cache
 
-- Redis Key-Value store database
-
- - Lua resty redis driver
-
 - Tirex, rendering backend
 
 - PostGIS
@@ -47,67 +43,24 @@ Lua script included by Nginx controls local rendering.
 It is an asumption that postgis server has limited osm data in region.
 
 Lua script retrive x/y/z parameter and check an existence of 
-tile data. If it is other area where the server provided, it goes upstream.
-It also check freshness of tile data. If data has been updated by importing,
-it ask renderd to generate new tile.
-
-In order to manage these meta-data, we use Redis KVS DBMS.
-Redis holds 3 type of data.
-
-- "a:x:y:z" avalability of data and its freshness. If key is exist, the server
- can provide tile for its x/y/z. If value is "d", it means tile should be regenerate.
-- "r:x:y:z" latest tile request date/time. It is updated by Lua script.
-- "c:x:y:z" access counter for specific tile. It can be used to analyzes 
- statistics.
+tile data. If it is out of area where the server provided, it goes upstream.
 
 We need another script to maintain tile generation control.
 We can get expire.list as "Tile expire method" explaines when importing diff.osm.
 http://wiki.openstreetmap.org/wiki/Tile_expire_methods
 
-We need to process it and update Redis KVS db expressed for tile expiry.
 
 planet import
 ---
 
-The directory updatedb has an incremental update script for osm data.
+The directory updatedb has an incremental update script and primary load script
+for osm data.
+It is now defaults geofabrik data and also supposed to use planet.osm.org data. 
 
 Reference
 --
 
-
 - http://svn.openstreetmap.org/applications/utils/tirex/tileserver/tileserver.js
 
 - http://wiki.openstreetmap.org/wiki/User:Stephankn/knowledgebase#Cleanup_of_ways_outside_the_bounding_box
-
-Sever environment
-==
-
-* Mapnik2.2
-
-you can get mapnik 2.2.0 from 
-
-- https://launchpad.net/~mapnik/+archive/nightly-trunk/+packages
-
-You can build most recent mapnik
-
-- https://github.com/mapnik/mapnik-packaging/tree/master/debian-nightlies
-
-
-* Tirex
-
-Please follow an instraction  here:
-
-- http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
-
-To-dos
---
-
-- import tool
-- A part to ask renderd to generate tile
-- server setup for PostGIS/renderd
-
-
- 
- 
- 
 
