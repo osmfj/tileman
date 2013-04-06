@@ -1,10 +1,13 @@
 Tile Cache recipe for tile.openstreetmap.jp
 =========
 
+Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
+
+
 Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
-- Nginx Web server
+- Nginx Web server (1.3.12 or over)
 
   - Lua embeded scripting 
 
@@ -12,11 +15,11 @@ It uses following technologies.
 
 - Tirex, rendering backend
 
-- PostGIS
+- PostGIS/postgresql 9.1
 
 - osm2pgsql
 
-- osmosis
+- osmosis (latest)
 
 This recipe is intended to run on Ubuntu 11.10(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
@@ -25,8 +28,10 @@ useful for other platform and who want to run osm tile server.
 License
 -- 
 
-The recipe is distributed under AGPLv3
-Each softwares are  under each licenses.
+The nginx recipe and lua script is distributed under AGPLv3.
+render_expire is made by Frederik Ramm <frederik@remote.org> and distirbuted
+by GPLv2.
+Each softwares are under the each licenses.
 
 Maintainer
 --
@@ -62,5 +67,7 @@ Reference
 
 - http://svn.openstreetmap.org/applications/utils/tirex/tileserver/tileserver.js
 
-- http://wiki.openstreetmap.org/wiki/User:Stephankn/knowledgebase#Cleanup_of_ways_outside_the_bounding_box
+- http://wiki.openstreetmap.org/wiki/User:Stephankn/knowledgebase
+
+- https://launchpad.net/~nginx/+archive/development
 

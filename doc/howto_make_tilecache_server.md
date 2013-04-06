@@ -4,10 +4,14 @@
 
 前提は、Ubuntu 11.10(amd64)サーバです。
 
-aptでgit, nginx-extra入れてください。
------------------------------------
+ソフトウエアインストール
+------------------------
 
-    $ sudo apt-get install git nginx-extra
+aptでgit, nginxを入れてください。nginxは最新版が必要です。
+
+    $ sudo apt-add-repositry ppa:nginx/development 
+    $ sudo apt-get update
+    $ sudo apt-get install git nginx-extras
 
 本リポジトリを取得します。
 ---------------------------
