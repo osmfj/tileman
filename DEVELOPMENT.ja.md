@@ -33,7 +33,7 @@ Ver 0.8
 Ver 0.9
 ----
 * PostGISデータベースに日本地域のOSMデータを日次で
-  自動更新できるようにします。(ほぼ完了)
+  自動更新できるようにします。(ほぼ完了) [*9]
 * アクセス元が日本国内かどうかを判定して、独自タイルの配信を
    切り替えます。(完了)
 * リクエストのx/y/z値をチェックして、レンダリング対象かどうかを
@@ -139,4 +139,4 @@ External Links
 * [*6] https://github.com/agentzh/lua-resty-redis
 * [*7] http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
 * [*8] http://wiki.openstreetmap.org/wiki/Osmosis
-
+* [*9] http://wiki.openstreetmap.org/wiki/Minutely_Mapnik
