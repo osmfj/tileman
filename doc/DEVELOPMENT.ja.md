@@ -108,6 +108,8 @@ Install
 これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
 
     $ cd render_expire
+    $ ./autogen.sh
+    $ ./configure --prefix=/opt/tileserver
     $ make
     $ sudo make install
     $ cd ..
