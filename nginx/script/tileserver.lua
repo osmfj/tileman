@@ -25,26 +25,6 @@ local metatile_header_size = 20 + metatile * 64
 
 bit = require 'bit'
 
--- function: isnumber
--- argument: variable n
--- return:
---   true:  when n is type number or string that can convert to number
---   false: other than above
---
-function isnumber (n)
-    if type(n) == "number" then
-        return true
-    elseif type(n) == "string" then
-        if tostring(n) == nil then
-            return false
-        else
-            return true
-        end
-    else
-        return false
-    end
-end
-
 -- function: serialize_tirex_msg
 -- argument: table msg
 --     hash table {key1=val1, key2=val2,....}
@@ -53,11 +33,9 @@ end
 --
 function serialize_tirex_msg (msg)
     local str = ''
-
     for k,v in pairs(msg) do
         str = str .. k .. '=' .. tostring(v) .. '\n'
     end
-    
     return str
 end
 
@@ -66,22 +44,15 @@ end
 --     should be 'key1=val1\nkey2=val2\n....\n'
 -- return: table
 --     hash table {key1=val1, key2=val2,....}
--- depend func: isnumber()
---
 function deserialize_tirex_msg (str) 
     local msg = {}
     for line in string.gmatch(str, "[^\n]+") do
-        m,k,v = string.find(line,"([^=]+)=(.+)")
+        m,_,k,v = string.find(line,"([^=]+)=(.+)")
         if  k ~= '' then
-            if isnumber(v) then
-                table.insert(msg, {k,tonumber(v)})
-            else
-                table.insert(msg, {k,v})
-            end
+            msg[k]=v
         end
     end
-
-    return msg;
+    return msg
 end
 
 -- function: xyz_to_filename
@@ -171,10 +142,10 @@ end
 --
 -- it send back tile to client
 --
-function send_tile_tirex (map, x, y, z)
+function send_tile_tirex (map, x, y, z, id)
     local udpsock = ngx.socket.udp()
     udpsock:settimeout(1000)
-    local ok, err = udpsock:setpeername('unix:/var/lib/tirex/modtile.sock')
+    local ok, err = udpsock:setpeername('unix:/var/run/tirex/master.sock')
     if not ok then
         ngx.log(ngx.ERR, "udpsock setpeername error")
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
@@ -184,14 +155,14 @@ function send_tile_tirex (map, x, y, z)
     local my = y - y % metatile
     local priority = 8
     local req = serialize_tirex_msg({
-        ["id"]   = 'luats-'..tostring(ngx.shared.stats:get("tiles_requested"));
+        ["id"]   = 'luats-'..tostring(id));
         ["type"] = 'metatile_enqueue_request';
         ["prio"] = priority;
         ["map"]  = map;
         ["x"]    = mx;
         ["y"]    = my;
         ["z"]    = z})
-    ngx.log(ngx.INFO, "request:",req)
+
     local ok, err = udpsock:send(req)
     if not ok then
         ngx.log(ngx.ERR, "udp send error")
@@ -205,7 +176,7 @@ function send_tile_tirex (map, x, y, z)
     end
 
     udpsock:close()
-	ngx.log(ngx.INFO, tostring(data))
+
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["id"]:sub(1,5) ~= "luats" then
         return
@@ -228,7 +199,11 @@ end
 --
 --
 ngx.shared.stats:incr("http_requests", 1)
-ngx.shared.stats:incr("tiles_requested", 1)
+local id = ngx.shared.stats:incr("tiles_requested", 1)
+if id == nil then
+    ngx.log(ngx.ERR, "stat dict error")
+    id = 0
+end
 
 local map = 'example'
 local x = ngx.var.x
@@ -238,7 +213,7 @@ local z = ngx.var.z
 local imgfile = get_imgfile(map, x, y, z)
 local fd, err = io.open(imgfile,"rb")
 if fd == nil then
-    send_tile_tirex(map, x, y, z)
+    send_tile_tirex(map, x, y, z, id)
 else
     ngx.shared.stats:incr("tiles_from_cache", 1)
     send_image(fd, map, x, y, z)
