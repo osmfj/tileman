@@ -175,7 +175,7 @@ end
 function send_tile_tirex (map, x, y, z)
     local udpsock = ngx.socket.udp()
     udpsock:settimeout(1000)
-    local ok, err = udp:setpeername(ngx.var.tirex_server, ngx.var.tirex_port)
+    local ok, err = udpsock:setpeername(ngx.var.tirex_server, ngx.var.tirex_port)
     if not ok then
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
