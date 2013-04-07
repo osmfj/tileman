@@ -18,7 +18,7 @@
 --    You should have received a copy of the GNU Affero General Public License
 --    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
-local bit = require 'bit'
+
 local minz = ngx.var.minz
 local maxz = ngx.var.maxz
 
@@ -37,11 +37,12 @@ if tonumber(z) < tonumber(minz) or tonumber(z) > tonumber(maxz) then
 end
 
 -- check x,y,z limitation
-local limit = 0
-limit = bit.blshift(1, tonumber(z))
-if tonumber(x) < 0 or tonumber(x) >= limit or tonumber(y) < 0 or tonumber(y) >= limit then
-  ngx.exit(ngx.HTTP_FORBIDDEN)
-end
+--local bit = require 'bit'
+--local limit = 0
+--limit = bit.blshift(1, tonumber(z))
+--if tonumber(x) < 0 or tonumber(x) >= limit or tonumber(y) < 0 or tonumber(y) >= limit then
+--  ngx.exit(ngx.HTTP_FORBIDDEN)
+--end
 
 ngx.var.x = x
 ngx.var.y = y
