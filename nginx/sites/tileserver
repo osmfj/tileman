@@ -7,9 +7,9 @@ server {
   error_log   /var/log/nginx/tileserver_error.log info;
 
   include common_location_params;
+  include tileserver_params;
 
   location / {
-    include tileserver_params;
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     content_by_lua '
       if ngx.var.own_tile == "no" then
@@ -21,7 +21,6 @@ server {
   }
 
   location @tileserver {
-    include tileserver_params;
     content_by_lua_file /etc/nginx/script/tileserver.lua; 
   }
 
