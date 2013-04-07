@@ -147,21 +147,6 @@ function send_image (fd, x, y, z)
     return
 end
 
--- function: open_tirex_socket
--- arguments: host, port
--- return: udp socket file descliptor
---
-function open_tirex_socket (host, port)
-    local udp = ngx.socket.udp()
-    udp:settimeout(1000)
-
-    local ok, err = udp:setpeername(host, port)
-    if not ok then
-        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
-    end
-    return udp
-end
-
 -- function: get_imgfile
 -- arguments: string map
 --            number x, y, z
@@ -185,7 +170,14 @@ end
 --
 -- it send back tile to client
 --
-function send_tile_tirex (udp, map, x, y, z)
+function send_tile_tirex (map, x, y, z)
+    local udpsock = ngx.socket.udp()
+    udpsock:settimeout(1000)
+    local ok, err = udp:setpeername(ngx.var.tirex_server, ngx.var.tirex_port)
+    if not ok then
+        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+    end
+
     local mx = x - x % metatile
     local my = y - y % metatile
     local priority = 8
@@ -198,18 +190,20 @@ function send_tile_tirex (udp, map, x, y, z)
         ["y"]    = my;
         ["z"]    = z})
 
-    local ok, err = udp:send(req)
+    local ok, err = udpsock:send(req)
 
     if not ok then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
-    local data, err = udp:receive()
+    local data, err = udpsock:receive()
 
     if not data then
         ngx.say("failed to read a packet: ", data)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
+
+    udpsock:close()
 
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["id"]:sub(1,5) ~= "luats" then
@@ -232,13 +226,12 @@ end
 --
 --
 ngx.shared.stats:incr("http_requests", 1)
-local ts = open_tirex_socket(ngx.var.tirex_server, ngx.var.tirex_port)
 ngx.shared.stats:incr("tiles_requested", 1)
 local map = ngx.var.mapname
 local imgfile = get_imgfile(map, x, y, z)
 local fd, err = io.open(imgfile,"rb")
 if fd == nil then
-    send_tile_tirex(ts, map, x, y, z)
+    send_tile_tirex(map, x, y, z)
 else
     ngx.shared.stats:incr("tiles_from_cache", 1)
     send_image(fd, map, x, y, z)
