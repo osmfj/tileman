@@ -12,5 +12,5 @@ set $maxz 18;
 set $tirex_master_port 9322;
 set $tirex_http_port 9320;
 set $tiledir "/var/opt/tileserver/tiles/"; # need last "/"
-set $map 'map';
+set $map '';
 
