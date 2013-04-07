@@ -18,32 +18,38 @@
 --    You should have received a copy of the GNU Affero General Public License
 --    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
+bit = require 'bit'
+local minz = tonumber(ngx.var.minz)
+local maxz = tonumber(ngx.var.maxz)
 
-local minz = ngx.var.minz
-local maxz = ngx.var.maxz
-
+-- only support png tiles
 if ngx.var.uri:sub(-4) ~= ".png" then
   ngx.exit(ngx.HTTP_FORBIDDEN)
 end
 
 local captures = "/(%d+)/(%d+)/(%d+).png"
-local s,_,z,x,y = ngx.var.uri:find(captures)
+local s,_,oz,ox,oy = ngx.var.uri:find(captures)
 if s == nil then
   ngx.exit(ngx.HTTP_NOT_FOUND)
 end
 
-if tonumber(z) < tonumber(minz) or tonumber(z) > tonumber(maxz) then
+local x = tonumber(ox)
+local y = tonumber(oy)
+local z = tonumber(oz)
+
+-- check x,y,z limitation
+if z < minz or z > maxz then
   ngx.exit(ngx.HTTP_FORBIDDEN)
 end
 
--- check x,y,z limitation
---local bit = require 'bit'
---local limit = 0
---limit = bit.blshift(1, tonumber(z))
---if tonumber(x) < 0 or tonumber(x) >= limit or tonumber(y) < 0 or tonumber(y) >= limit then
---  ngx.exit(ngx.HTTP_FORBIDDEN)
---end
+local lim = 0
+lim = bit.lshift(1, z)
+if x<0 or x>=lim or y<0 or y>=lim then
+  ngx.exit(ngx.HTTP_FORBIDDEN)
+end
 
-ngx.var.x = x
-ngx.var.y = y
-ngx.var.z = z
+-- store x, y, z into nginx var
+ngx.var.x = ox
+ngx.var.y = oy
+ngx.var.z = oz
+
