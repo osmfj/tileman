@@ -152,7 +152,7 @@ end
 -- return: udp socket file descliptor
 --
 function open_tirex_socket (host, port)
-    local udp = socket.udp()
+    local udp = ngx.socket.udp()
     udp:settimeout(1000)
 
     local ok, err = udp:setpeername(host, port)
@@ -204,7 +204,7 @@ function send_tile_tirex (udp, map, x, y, z)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
-    local data, err = sock:receive()
+    local data, err = udp:receive()
 
     if not data then
         ngx.say("failed to read a packet: ", data)
