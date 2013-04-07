@@ -23,6 +23,8 @@
 local metatile = 8
 local metatile_header_size = 20 + metatile * 64
 
+bit = require 'bit'
+
 -- function: isnumber
 -- argument: variable n
 -- return:
@@ -69,7 +71,7 @@ end
 function deserialize_tirex_msg (str) 
     local msg = {}
     for line in string.gmatch(str, "[^\n]+") do
-        m,k,v = string.find(line,"([^=]+)=(.+)") do
+        m,k,v = string.find(line,"([^=]+)=(.+)")
         if  k ~= '' then
             if isnumber(v) then
                 table.insert(msg, {k,tonumber(v)})
@@ -95,11 +97,11 @@ function xyz_to_filename (x, y, z)
     y = y - y % metatile
 
     for i=0, 4 do
-        v = x & 0x0f
-        v = v << 4
-        v = v | (y & 0x0f)
-        x = x >> 4
-        y = y >> 4
+        v = bit.band(x, 0x0f)
+        v = bit.rshift(v, 4)
+        v = bit.bor(v, bit.band(y, 0x0f))
+        x = bit.rshift(x, 4)
+        y = bit.rshift(y, 4)
         res = res .. tostring(v) .. '/'
     end
 
@@ -188,19 +190,19 @@ function send_tile_tirex (udp, map, x, y, z)
     local my = y - y % metatile
     local priority = 8
     local req = serialize_tirex_msg({
-        "id"='luats-' .. ngx.shared.stats:get("tiles_requested"),
-        "type"='metatile_enqueue_request',
-        "prio"= priority,
-        "map"= map,
-        "x"=mx,
-        "y"=my,
-        "z"=z
-    });
+        ["id"]   = 'luats-'..ngx.shared.stats:get("tiles_requested");
+        ["type"] = 'metatile_enqueue_request';
+        ["prio"] = priority;
+        ["map"]  = map;
+        ["x"]    = mx;
+        ["y"]    = my;
+        ["z"]    = z})
+
     local ok, err = udp:send(req)
 
     if not ok then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    return
+    end
 
     local data, err = sock:receive()
 
@@ -210,7 +212,7 @@ function send_tile_tirex (udp, map, x, y, z)
     end
 
     local msg = deserialize_tirex_msg(tostring(data))
-    if msg["id"]:sub(1,5) ~= "luats"
+    if msg["id"]:sub(1,5) ~= "luats" then
         return
     end
 
