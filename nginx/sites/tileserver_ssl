@@ -9,11 +9,11 @@ server {
 
   include ssl_params;
   include common_location_params;
+  include tileserver_params;
 
   location / {
-    include tileserver_params;
     access_by_lua_file /etc/nginx/script/tilecheck.lua;
-    access_by_lua '
+    content_by_lua '
       if ngx.var.own_tile == "no" then
         return ngx.exec("@tilecache")
       end

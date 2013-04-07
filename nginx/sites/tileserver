@@ -21,7 +21,7 @@ server {
   }
 
   location @tileserver {
-    set $tirex_port 9320;
+    include tileserver_params;
     content_by_lua_file /etc/nginx/script/tileserver.lua; 
   }
 

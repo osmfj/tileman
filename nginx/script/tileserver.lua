@@ -106,7 +106,7 @@ function xyz_to_filename (ox, oy, z)
         y = bit.rshift(y, 4)
         res = res .. tostring(v) .. '/'
     end
-
+    ngx.log(ngx.INFO, res..tostring(z)..'.meta')
     return res .. tostring(z) .. '.meta'
 end
 
@@ -114,10 +114,6 @@ end
 -- FIXME binary operations
 function getLong (buffer, offset)
     return ((buffer[offset+3] * 256 + buffer[offset+2]) * 256 + buffer[offset+1]) * 256 + buffer[offset]
-end
-
-function fingerprint(map, z, x, y)
-    return map .. '/' .. tostring(z) .. '/' .. tostring(x) .. '/' .. tostring(y)
 end
 
 -- function: send_image
@@ -130,6 +126,7 @@ function send_image (fd, x, y, z)
     local header, err = fd:read(metatile_header_size)
     if header == nil then
         fd:close()
+        ngx.log(ngx.ERR, "fd read error")
         return ngx.exit(ngx.HTTP_SERVER_INTERNAL_ERROR)
     end
 
@@ -140,6 +137,7 @@ function send_image (fd, x, y, z)
     local png = fd:read(size)
     if png == nil then
         fd:close()
+        ngx.log(ngx.ERR, "fd:read error")
         return ngx.exit(ngx.HTTP_SERVER_INTERNAL_ERROR)
     end
 
@@ -155,7 +153,8 @@ end
 -- return string filename
 --
 function get_imgfile (map, x, y, z)
-    local imgfile = ngx.var.tiledir
+    ngx.log(ngx.INFO, "xyz", x, y, z)
+    local imgfile = "/var/lib/tirex/tiles/"
     if map == nil or map == "" then
         imgfile = imgfile..xyz_to_filename(x, y, z)
     else
@@ -175,8 +174,9 @@ end
 function send_tile_tirex (map, x, y, z)
     local udpsock = ngx.socket.udp()
     udpsock:settimeout(1000)
-    local ok, err = udpsock:setpeername(ngx.var.tirex_server, ngx.var.tirex_port)
+    local ok, err = udpsock:setpeername('unix:/var/lib/tirex/modtile.sock')
     if not ok then
+        ngx.log(ngx.ERR, "udpsock setpeername error")
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
 
@@ -184,29 +184,28 @@ function send_tile_tirex (map, x, y, z)
     local my = y - y % metatile
     local priority = 8
     local req = serialize_tirex_msg({
-        ["id"]   = 'luats-'..ngx.shared.stats:get("tiles_requested");
+        ["id"]   = 'luats-'..tostring(ngx.shared.stats:get("tiles_requested"));
         ["type"] = 'metatile_enqueue_request';
         ["prio"] = priority;
         ["map"]  = map;
         ["x"]    = mx;
         ["y"]    = my;
         ["z"]    = z})
-
+    ngx.log(ngx.INFO, "request:",req)
     local ok, err = udpsock:send(req)
-
     if not ok then
+        ngx.log(ngx.ERR, "udp send error")
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
     local data, err = udpsock:receive()
-
     if not data then
-        ngx.say("failed to read a packet: ", data)
+        ngx.log(ngx.ERR, "failed to read a packet: ", data)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
     udpsock:close()
-
+	ngx.log(ngx.INFO, tostring(data))
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["id"]:sub(1,5) ~= "luats" then
         return
@@ -216,6 +215,7 @@ function send_tile_tirex (map, x, y, z)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
         fd:close()
+        ngx.log(ngx.ERR, "io open error")
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     else
         ngx.shared.stats.incr("tiles_rendered", 1)
@@ -227,17 +227,15 @@ end
 -- main routine
 --
 --
-
 ngx.shared.stats:incr("http_requests", 1)
 ngx.shared.stats:incr("tiles_requested", 1)
 
-local map = ngx.var.mapname
+local map = 'example'
 local x = ngx.var.x
 local y = ngx.var.y
 local z = ngx.var.z
 
 local imgfile = get_imgfile(map, x, y, z)
-
 local fd, err = io.open(imgfile,"rb")
 if fd == nil then
     send_tile_tirex(map, x, y, z)
