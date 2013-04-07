@@ -18,6 +18,11 @@ server {
   }
 
   location / {
+    set $x 0;
+    set $y 0;
+    set $z 0;
+    set $minz 0;
+    set $maxz 18;
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;

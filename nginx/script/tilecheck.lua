@@ -18,8 +18,8 @@
 --    You should have received a copy of the GNU Affero General Public License
 --    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
-local minz = 0
-local maxz = 18
+local minz = ngx.var.minz
+local maxz = ngx.var.maxz
 
 if ngx.var.uri:sub(-4) ~= ".png" then
   ngx.exit(ngx.HTTP_FORBIDDEN)
@@ -35,3 +35,11 @@ if (tonumber(z) < minz) or (tonumber(z) > maxz) then
   ngx.exit(ngx.HTTP_FORBIDDEN)
 end
 
+local limit = 1 << z
+if x < 0 or x >= limit or y < 0 or y >= limit then
+  ngx.exit(ngx.HTTP_FORBIDDEN)
+end
+
+ngx.var.x = x
+ngx.var.y = y
+ngx.var.z = z
