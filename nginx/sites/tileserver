@@ -6,18 +6,10 @@ server {
   access_log  /var/log/nginx/tileserver_access.log combined;
   error_log   /var/log/nginx/tileserver_error.log info;
 
-  location = /favicon.ico {
-        log_not_found off;
-        access_log off;
-  }
-
-  location = /robots.txt {
-        allow all;
-        log_not_found off;
-        access_log off;
-  }
+  include common_location_params;
 
   location / {
+    include tileserver_params;
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     access_by_lua '
       if ngx.var.own_tile == "no" then
@@ -29,6 +21,7 @@ server {
   }
 
   location @tileserver {
+    set $tirex_port 9320;
     content_by_lua_file /etc/nginx/script/tileserver.lua; 
   }
 

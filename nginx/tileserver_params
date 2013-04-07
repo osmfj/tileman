@@ -1,0 +1,16 @@
+# tileserver params
+# that need for tilecheck.lua and/or tileserver.lua
+
+# nessesary for tilecheck
+set $x 0;
+set $y 0;
+set $z 0;
+set $minz 0;
+set $maxz 18;
+
+# nessesary for tileserver 
+set $tirex_master_port 9322;
+set $tirex_http_port 9320;
+set $tiledir "/var/opt/tileserver/tiles/"; # need last "/"
+set $map 'map';
+
