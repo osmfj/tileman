@@ -5,4 +5,4 @@ tar xf LuaBitOp-1.0.2.tar.gz
 (cd LuaBitOp-1.0.2 ; \
 patch -p1 -i ../LuaBitOp_ubuntu.patch && \
 make&& \
-make install)
+sudo make install)
