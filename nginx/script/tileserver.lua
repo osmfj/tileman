@@ -89,9 +89,11 @@ end
 -- return: filename of metatile
 -- global: metatile(8) metatile multiplexity
 --
-function xyz_to_filename (x, y, z) 
+function xyz_to_filename (ox, oy, z) 
     local res=''
-
+    local x = tonumber(ox)
+    local y = tonumber(oy)
+    local v = 0
     -- make sure we have metatile coordinates
     x = x - x % metatile
     y = y - y % metatile
@@ -225,10 +227,17 @@ end
 -- main routine
 --
 --
+
 ngx.shared.stats:incr("http_requests", 1)
 ngx.shared.stats:incr("tiles_requested", 1)
+
 local map = ngx.var.mapname
+local x = ngx.var.x
+local y = ngx.var.y
+local z = ngx.var.z
+
 local imgfile = get_imgfile(map, x, y, z)
+
 local fd, err = io.open(imgfile,"rb")
 if fd == nil then
     send_tile_tirex(map, x, y, z)
