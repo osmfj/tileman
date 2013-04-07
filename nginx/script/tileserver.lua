@@ -155,7 +155,7 @@ end
 -- return string filename
 --
 function get_imgfile (map, x, y, z)
-    local imgfilie = ngx.var.tiledir
+    local imgfile = ngx.var.tiledir
     if map == nil or map == "" then
         imgfile = imgfile..xyz_to_filename(x, y, z)
     else
