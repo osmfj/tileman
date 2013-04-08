@@ -77,14 +77,13 @@ function xyz_to_filename (ox, oy, z)
         y = bit.rshift(y, 4)
         res = res .. tostring(v) .. '/'
     end
-    ngx.log(ngx.INFO, res..tostring(z)..'.meta')
     return res .. tostring(z) .. '.meta'
 end
 
 -- get long value at offset from buffer
--- FIXME binary operations
+-- buffer should be string
 function getLong (buffer, offset)
-    return ((buffer[offset+3] * 256 + buffer[offset+2]) * 256 + buffer[offset+1]) * 256 + buffer[offset]
+    return ((buffer:byte(offset+3) * 256 + buffer:byte(offset+2)) * 256 + buffer:byte(offset+1)) * 256 + buffer:byte(offset)
 end
 
 -- function: send_image
@@ -124,7 +123,6 @@ end
 -- return string filename
 --
 function get_imgfile (map, x, y, z)
-    ngx.log(ngx.INFO, "xyz", x, y, z)
     local imgfile = "/var/lib/tirex/tiles/"
     if map == nil or map == "" then
         imgfile = imgfile..xyz_to_filename(x, y, z)
@@ -155,7 +153,7 @@ function send_tile_tirex (map, x, y, z, id)
     local my = y - y % metatile
     local priority = 8
     local req = serialize_tirex_msg({
-        ["id"]   = 'luats-'..tostring(id));
+        ["id"]   = 'luats-'..tostring(id);
         ["type"] = 'metatile_enqueue_request';
         ["prio"] = priority;
         ["map"]  = map;
@@ -189,7 +187,8 @@ function send_tile_tirex (map, x, y, z, id)
         ngx.log(ngx.ERR, "io open error")
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     else
-        ngx.shared.stats.incr("tiles_rendered", 1)
+        local stats = ngx.shared.stats
+        stats:incr("tiles_rendered", 1)
         send_image(fd, map, x, y, z)
         fd:close()
     end
@@ -198,8 +197,18 @@ end
 -- main routine
 --
 --
-ngx.shared.stats:incr("http_requests", 1)
-local id = ngx.shared.stats:incr("tiles_requested", 1)
+local stats=ngx.shared.stats
+
+-- init shared memory dictionay.
+-- add keys when don't exist
+stats:add("http_requests", 0)
+stats:add("tiles_requested",0)
+stats:add("tiles_from_cache",0)
+stats:add("tiles_rendered",0)
+--
+
+stats:incr("http_requests", 1)
+local id = stats:incr("tiles_requested", 1)
 if id == nil then
     ngx.log(ngx.ERR, "stat dict error")
     id = 0
@@ -215,7 +224,7 @@ local fd, err = io.open(imgfile,"rb")
 if fd == nil then
     send_tile_tirex(map, x, y, z, id)
 else
-    ngx.shared.stats:incr("tiles_from_cache", 1)
+    stats:incr("tiles_from_cache", 1)
     send_image(fd, map, x, y, z)
     fd:close()
 end
