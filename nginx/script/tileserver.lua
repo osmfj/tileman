@@ -20,9 +20,7 @@
 
 -- constants
 --
-local metatile = 8
-local metatile_header_size = 20 + metatile * 64
-
+metatile = 8
 bit = require 'bit'
 
 -- function: serialize_tirex_msg
@@ -66,8 +64,8 @@ function xyz_to_filename (ox, oy, z)
     local y = tonumber(oy)
     local v = 0
     -- make sure we have metatile coordinates
-    x = x - x % metatile
-    y = y - y % metatile
+    x = x - x % 8
+    y = y - y % 8
 
     for i=0, 4 do
         v = bit.band(x, 0x0f)
@@ -83,6 +81,7 @@ end
 -- get long value at offset from buffer
 -- buffer should be string
 function getLong (buffer, offset)
+    ngx.log(ngx.DEBUG, "buffer byte of offset:", buffer:byte(offset))
     return ((buffer:byte(offset+3) * 256 + buffer:byte(offset+2)) * 256 + buffer:byte(offset+1)) * 256 + buffer:byte(offset)
 end
 
@@ -93,6 +92,7 @@ end
 -- description: send back tile image to client
 --
 function send_image (fd, sx, sy, z)
+    local metatile_header_size = 20 + 8 * 64 -- 532
     local x = tonumber(sx)
     local y = tonumber(sy)
     local header, err = fd:read(metatile_header_size)
@@ -102,10 +102,10 @@ function send_image (fd, sx, sy, z)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
-    local pib = 20 + ((y % metatile) * metatile) + ((x % metatile) * metatile*metatile ) -- offset into lookup table in header
+    local pib = 20 + ((y % 8) * 8) + ((x % 8) * 64 ) -- offset into lookup table in header
     local offset = getLong(header, pib)
     local size = getLong(header, pib+4)
-    ngx.log(ngx.INFO, "offset:size, ",offset,":",size)
+    ngx.log(ngx.DEBUG, "pib:offset:size, ",pib,":",offset,":",size)
     fd:seek("set", offset)
     local png, err = fd:read(size)
     if png == nil then
@@ -152,8 +152,8 @@ function send_tile_tirex (map, x, y, z, id)
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
 
-    local mx = x - x % metatile
-    local my = y - y % metatile
+    local mx = x - x % 8
+    local my = y - y % 8
     local priority = 8
     local req = serialize_tirex_msg({
         ["id"]   = 'luats-'..tostring(id);
@@ -163,7 +163,7 @@ function send_tile_tirex (map, x, y, z, id)
         ["x"]    = mx;
         ["y"]    = my;
         ["z"]    = z})
-
+    ngx.log(ngx.DEBUG, "tirex req:", req)
     local ok, err = udpsock:send(req)
     if not ok then
         ngx.log(ngx.ERR, "udp send error")
@@ -184,7 +184,7 @@ function send_tile_tirex (map, x, y, z, id)
     end
 
     local imgfile = get_imgfile(map, x, y, z)
-    ngx.log(ngx.INFO, imgfile)
+    ngx.log(ngx.DEBUG, imgfile)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
         ngx.log(ngx.ERR, "io open error:", err)
