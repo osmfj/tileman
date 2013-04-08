@@ -75,9 +75,9 @@ function xyz_to_filename (ox, oy, z)
         v = bit.bor(v, bit.band(y, 0x0f))
         x = bit.rshift(x, 4)
         y = bit.rshift(y, 4)
-        res = res .. tostring(v) .. '/'
+        res = res..'/'..tostring(v)
     end
-    return res .. tostring(z) .. '.meta'
+    return tostring(z)..res..'.meta'
 end
 
 -- get long value at offset from buffer
@@ -92,23 +92,26 @@ end
 -- return:
 -- description: send back tile image to client
 --
-function send_image (fd, x, y, z)
+function send_image (fd, sx, sy, z)
+    local x = tonumber(sx)
+    local y = tonumber(sy)
     local header, err = fd:read(metatile_header_size)
     if header == nil then
         fd:close()
-        ngx.log(ngx.ERR, "fd read error")
-        return ngx.exit(ngx.HTTP_SERVER_INTERNAL_ERROR)
+        ngx.log(ngx.ERR, "fd:read header error",err)
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
     local pib = 20 + ((y % metatile) * metatile) + ((x % metatile) * metatile*metatile ) -- offset into lookup table in header
     local offset = getLong(header, pib)
     local size = getLong(header, pib+4)
-    fd:seek(offset)
-    local png = fd:read(size)
+    ngx.log(ngx.INFO, "offset:size, ",offset,":",size)
+    fd:seek("set", offset)
+    local png, err = fd:read(size)
     if png == nil then
         fd:close()
-        ngx.log(ngx.ERR, "fd:read error")
-        return ngx.exit(ngx.HTTP_SERVER_INTERNAL_ERROR)
+        ngx.log(ngx.ERR, "fd:read error", err)
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
 
     ngx.header.content_type = 'image/png'
@@ -181,15 +184,15 @@ function send_tile_tirex (map, x, y, z, id)
     end
 
     local imgfile = get_imgfile(map, x, y, z)
+    ngx.log(ngx.INFO, imgfile)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
-        fd:close()
-        ngx.log(ngx.ERR, "io open error")
+        ngx.log(ngx.ERR, "io open error:", err)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     else
         local stats = ngx.shared.stats
         stats:incr("tiles_rendered", 1)
-        send_image(fd, map, x, y, z)
+        send_image(fd, x, y, z)
         fd:close()
     end
 end
@@ -225,7 +228,7 @@ if fd == nil then
     send_tile_tirex(map, x, y, z, id)
 else
     stats:incr("tiles_from_cache", 1)
-    send_image(fd, map, x, y, z)
+    send_image(fd, x, y, z)
     fd:close()
 end
 
