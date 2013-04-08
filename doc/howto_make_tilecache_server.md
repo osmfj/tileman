@@ -7,9 +7,11 @@
 ソフトウエアインストール
 ------------------------
 
-aptでgit, nginxを入れてください。nginxは最新版が必要です。
+aptでgit, nginxを入れてください。nginxは1.2.x版が必要です。
+また、nginx-extras に含まれる組み込みLua言語が、
+最新の0.7.xバージョンである必要があります。
 
-    $ sudo apt-add-repositry ppa:nginx/development 
+    $ sudo apt-add-repositry ppa:miurahr/nginx 
     $ sudo apt-get update
     $ sudo apt-get install git nginx-extras
 
