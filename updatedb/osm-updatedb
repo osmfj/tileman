@@ -18,13 +18,13 @@ CONF=osmdb.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
-${WORKDIR_OSM:=/var/opt/osmosis}
-${DBUSER:=osm}
-${DBNAME:=gis}
-${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
-${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
-${PSQL_BIN:=/usr/bin/psql}
-${EXPIRE_ZOOM:=15}
+WORKDIR_OSM=${WORKDIR_OSM:=/var/opt/osmosis}
+DBUSER=${DBUSER:=osm}
+DBNAME=${DBNAME:=gis}
+OSMOSIS_BIN=${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
+OSM2PGSQL_BIN=${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
+PSQL_BIN=${PSQL_BIN:=/usr/bin/psql}
+EXPIRE_ZOOM=${EXPIRE_ZOOM:=15}
 
 OSC_PIPE=/tmp/changes_osc.$$
 EXPIRE_PIPE=/tmp/expire_list.$$
