@@ -121,7 +121,6 @@ function send_image (fd, sx, sy, z)
 
     ngx.header.content_type = 'image/png'
     ngx.print(png)
-    fd:close()
     return
 end
 
