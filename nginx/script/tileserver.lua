@@ -189,7 +189,7 @@ function send_tile_tirex (map, x, y, z, id)
     end
 
     local imgfile = get_imgfile(map, x, y, z)
-    ngx.log(ngx.DEBUG, "Meta file path: "imgfile)
+    ngx.log(ngx.DEBUG, "Meta file path: ",imgfile)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
         ngx.log(ngx.INFO, "tirex: metatile open error: ", err)
