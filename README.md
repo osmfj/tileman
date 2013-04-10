@@ -1,4 +1,4 @@
-Tile Cache recipe for tile.openstreetmap.jp
+Tileserver recipe for tile.openstreetmap.jp
 =========
 
 Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
@@ -7,11 +7,7 @@ Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
 Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
-- Nginx Web server (1.3.12 or over)
-
-  - Lua embeded scripting 
-
-  - File Cache
+- Nginx Web server (v1.2.8 + lua-module 0.7.19)
 
 - Tirex, rendering backend
 
@@ -19,15 +15,23 @@ It uses following technologies.
 
 - osm2pgsql
 
-- osmosis (latest)
+- osmosis (v0.43)
 
-This recipe is intended to run on Ubuntu 11.10(x86_64) server but it may be
+This recipe is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
 
 
+Version
+----
+
+Ver 1.0-beta1
+Release 11, April, 2013
+
+
 Install
---
+----
 [Setup development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Setup-development-environment-using-Vagrant)
+
 
 License
 -- 
@@ -82,12 +86,4 @@ A nginx configuration, statictile provides a solution for these case.
 For details, please refer doc/statictile.ja.txt
 
 
-Reference
---
-
-- http://svn.openstreetmap.org/applications/utils/tirex/tileserver/tileserver.js
-
-- http://wiki.openstreetmap.org/wiki/User:Stephankn/knowledgebase
-
-- https://launchpad.net/~nginx/+archive/development
 
