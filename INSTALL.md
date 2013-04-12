@@ -109,7 +109,7 @@ You will need following softwares for serving original renderer.
   sudo apt-add-repository ppa:sharpie/postgis-stable
   sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
   sudo apt-get update
-  sudo apt-get install postgis2
+  sudo apt-get install postgresql-9.1-postgis2
   ```
 
 2. Mapnik
