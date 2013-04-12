@@ -20,7 +20,7 @@ sudo apt-get install nginx nginx-extras
 1. Install dependencies
 
   ```
-  sudo apt-get install build-essential geoip-database dh-autoreconf
+  sudo apt-get install build-essential geoip-database dh-autoreconf lua5.1
   ```
 
 2. Install lua-nginx-redis
