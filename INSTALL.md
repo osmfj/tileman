@@ -27,14 +27,15 @@ sudo apt-get install nginx-extras
 
   ```
   git clone git://github.com/osmfj/tilecache.git
+  cd tilecache
   sudo dpkg -i pkgs/lua-nginx-redis_0.15-1_all.deb
   ```
 
 3. Install libraries
 
   ```
-  cd ../lib
-  sudo /install.sh
+  cd lib
+  sudo ./install.sh
   ```
 
 4. Setup nginx configulation
