@@ -12,7 +12,7 @@ And you can serve original local tile images placed X/Y/Z folder.
 ```
 sudo apt-add-repository ppa:miurahr/openstreetmap
 sudo apt-get update
-sudo apt-get install nginx nginx-extras
+sudo apt-get install nginx-extras
 ```
 
 ## Install tilecache
