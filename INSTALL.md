@@ -27,8 +27,7 @@ sudo apt-get install nginx-extras
 
   ```
   git clone git://github.com/osmfj/tilecache.git
-  cd pkgs
-  sudo dpkg -i /vagrant/tilecache/pkgs/lua-nginx-redis_0.15-1_all.deb
+  sudo dpkg -i pkgs/lua-nginx-redis_0.15-1_all.deb
   ```
 
 3. Install libraries
