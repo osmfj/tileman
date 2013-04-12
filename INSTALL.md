@@ -12,7 +12,7 @@ And you can serve original local tile images placed X/Y/Z folder.
 ```
 sudo apt-add-repository ppa:miurahr/openstreetmap
 sudo apt-get update
-sudo apt-get install nginx
+sudo apt-get install nginx nginx-extras
 ```
 
 ## Install tilecache
@@ -20,9 +20,7 @@ sudo apt-get install nginx
 1. Install dependencies
 
   ```
-  sudo apt-get install build-essential
-  sudo apt-get install geoip-database
-  sudo apt-get install dh-autoreconf
+  sudo apt-get install build-essential geoip-database dh-autoreconf
   ```
 
 2. Install lua-nginx-redis
