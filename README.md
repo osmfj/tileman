@@ -7,7 +7,8 @@ Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
 Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
-- Nginx Web server (v1.2.8 + lua-module 0.7.19)
+- Nginx Web server (tested nginx v1.2.6 + lua-module 0.7.19)
+  we provide PPA for ubuntu user. You need to select nginx-extras package.
 
 - Tirex, rendering backend
 
@@ -15,7 +16,7 @@ It uses following technologies.
 
 - osm2pgsql
 
-- osmosis (v0.43)
+- osmosis (recommend v0.40 or later)
 
 This recipe is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
@@ -45,7 +46,6 @@ Maintainer
 --
 
 It is maintained by OpenStreetMap Foundation Japan.
-
 
 Design
 ==
@@ -84,6 +84,5 @@ rules, such as administration claims.
 
 A nginx configuration, statictile provides a solution for these case.
 For details, please refer doc/statictile.ja.txt
-
 
 
