@@ -128,4 +128,8 @@ You will need following softwares for serving original renderer.
        tirex-nagios-plugin tirex-syncd
   ```
 
+4. Importing tools
 
+  ```
+  apt-get install osm2pgsql 
+  ```
