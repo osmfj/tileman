@@ -131,5 +131,8 @@ You will need following softwares for serving original renderer.
 4. Importing tools
 
   ```
-  apt-get install osm2pgsql 
+  # osm2pgsql, osmoisis
+  sudo apt-get install default-java # if not installed
+  sudo apt-get install osm2pgsql osmosis
   ```
+
