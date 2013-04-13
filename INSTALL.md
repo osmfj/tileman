@@ -20,32 +20,24 @@ sudo apt-get install nginx-extras
 1. Install dependencies
 
   ```
-  sudo apt-get install build-essential geoip-database dh-autoreconf lua5.1
+  sudo apt-get install build-essential geoip-database dh-autoreconf liblua5.1-bitop0 lua5.1
   ```
 
-2. Install lua-nginx-redis
-
-  ```
-  git clone git://github.com/osmfj/tilecache.git
-  cd tilecache
-  sudo dpkg -i pkgs/lua-nginx-redis_0.15-1_all.deb
-  ```
-
-3. Install libraries
+2. Install libraries
 
   ```
   cd lib
   sudo ./install.sh
   ```
 
-4. Setup nginx configulation
+3. Setup nginx configulation
 
   ```
   cd ../nginx
   sudo ./install.sh
   ```
 
-5. Install render_expire
+4. Install render_expire
 
   ```
   cd ../render_expire
@@ -55,7 +47,7 @@ sudo apt-get install nginx-extras
   sudo make
   ```
 
-6. Setup nginx configuration
+5. Setup nginx configuration
 
   ```
   sudo ln -s /etc/nginx/sites-available/tileproxy /etc/nginx/sites-enabled/tileproxy
@@ -67,20 +59,20 @@ sudo apt-get install nginx-extras
   sudo ln -s /etc/nginx/sites-available/tileproxy-ssl /etc/nginx/sites-enabled/tileproxy-ssl
   ```
 
-7. Create cache folder
+6. Create cache folder
 
   ```
   sudo mkdir /home/tilecache
   sudo chmod 777 /home/tilecache
   ```
 
-8. Restart nginx
+7. Restart nginx
 
   ```
   sudo service nginx restart
   ```
 
-9. Test
+8. Test
 
   You can access to the nginx from your local machine. And the tilecache server's VirtualHost is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
 
