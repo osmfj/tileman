@@ -36,5 +36,5 @@ AX_PTHREAD(,[AC_MSG_ERROR([no])])
 AC_SEARCH_LIBS(pow,m)
 AC_CHECK_FUNCS([bzero gettimeofday memset mkdir pow strchr strdup strerror strrchr strstr strtol strtoul utime],[],[AC_MSG_ERROR([One of the required functions was not found])])
 
-AC_CONFIG_FILES(Makefile iniparser3.0b/Makefile)
+AC_CONFIG_FILES(Makefile)
 AC_OUTPUT

@@ -1,5 +1,4 @@
 AUTOMAKE_OPTIONS = foreign
-SUBDIRS = iniparser3.0b
 
 ACLOCAL_AMFLAGS = -I m4
 
