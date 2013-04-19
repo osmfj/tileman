@@ -7,9 +7,9 @@ server {
   error_log   /var/log/nginx/tileproxy_error.log info;
 
   include common_location_params;
+  include tileserver_params;
 
   location / {
-    include tileserver_params;
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;

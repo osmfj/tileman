@@ -12,12 +12,7 @@ server {
   include tileserver_params;
 
   location / {
-    access_by_lua_file /etc/nginx/script/tilecheck.lua;
-    content_by_lua '
-      if ngx.var.own_tile == "no" then
-        return ngx.exec("@tilecache")
-      end
-    ';
+    access_by_lua_file /etc/nginx/script/stilecheck.lua;
     root /var/opt/tileserver/static;
     try_files $uri $uri/ @tileserver;
   }
