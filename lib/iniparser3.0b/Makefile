@@ -23,48 +23,50 @@ LIBTOOL=/usr/bin/libtool
 INSTALL=/usr/bin/install -c
 DESTDIR=/usr/local/lib
 
+SRCDIR=./src/
+OUTDIR=./build/
+
 # Implicit rules
 
-SUFFIXES = .o .c .h .a .so .sl
+SUFFIXES = .o .c .h .a .so .sl .lo
 
-COMPILE.c=$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) -c
-.c.o:
-	@(echo "compiling $< ...")
-	@($(COMPILE.c) -o $@ $<)
+COMPILE.c=$(CC) $(CFLAGS) -c
+LTCOMPILE.c=$(LIBTOOL) --tag=CC --mode=compile $(CC) $(CFLAGS) -c
 
+SRCS = $(SRCDIR)iniparser.c \
+	   $(SRCDIR)dictionary.c
 
-SRCS = src/iniparser.c \
-	   src/dictionary.c
+OBJS = $(OUTDIR)iniparser.o $(OUTDIR)dictionary.o
+LTOBJS = $(OUTDIR)iniparser.lo $(OUTDIR)dictionary.lo
+TARGETS = $(OUTDIR)libiniparser.la $(OUTDIR)libiniparser.so
 
-OBJS = $(SRCS:.c=.o)
+default:	$(TARGETS)
 
-default:	libiniparser.a libiniparser.so libiniparser.la
+$(OUTDIR)iniparser.lo: $(SRCDIR)iniparser.c
+	$(LTCOMPILE.c) -o $(OUTDIR)iniparser.lo $(SRCDIR)iniparser.c
 
-libiniparser.a:	$(OBJS)
-	@$(LIBTOOL) --mode=link $(CC) $(CFLAGS) --static -o libiniparser.a $(OBJS)
+$(OUTDIR)dictionary.lo: $(SRCDIR)dictionary.c
+	$(LTCOMPILE.c) -o $(OUTDIR)dictionary.lo $(SRCDIR)dictionary.c
 
-libiniparser.la:	$(OBJS)
-	@$(LIBTOOL) --mode=link $(CC) $(CFLAGS) --static -o libiniparser.la $(OBJS)
+$(OUTDIR)libiniparser.la:	$(LTOBJS)
+	@$(LIBTOOL) --tag=CC --mode=link $(CC) $(CFLAGS) -version-info 3 -o $@ $(LTOBJS)
 
-libiniparser.so:	$(OBJS)
+$(OUTDIR)libiniparser.so:	$(OBJS)
 	@$(LIBOOL) --mode=link $(SHLD) $(LDSHFLAGS) -o $@.3 $(OBJS) $(LDFLAGS) \
-		-Wl,-soname=`basename $@`.3
+		-Wl,-soname=`basename $@`.3 
 
-install:	libiniparser.la libiniparser.a libiniparser.so
-	@$(LIBOOL) --mode=install $(INSTALL) libiniparser.a $(DESTDIR)
-	@$(LIBOOL) --mode=install $(INSTALL) libiniparser.la $(DESTDIR)
-	@$(LIBOOL) --mode=install $(INSTALL) libiniparser.so.3 $(DESTDIR)
+install:	$(TARGETS)
+	@$(LIBOOL) --mode=install $(INSTALL) $(OUTDIR).libs/libiniparser.a $(DESTDIR)
+	@$(LIBOOL) --mode=install $(INSTALL) $(OUTDIR)libiniparser.la $(DESTDIR)
+	@$(LIBOOL) --mode=install $(INSTALL) $(OUTDIR)libiniparser.so.3 $(DESTDIR)
 
 clean:
-	$(RM) $(OBJS)
+	$(RM) $(OBJS) $(LTOBJS)
 
 veryclean:
-	$(RM) $(OBJS) libiniparser.a libiniparser.so*
-	rm -rf ./html ; mkdir html
+	$(RM) $(OBJS) $(LTOBJS) $(TARGETS) 
+	$(RM) -r build
 	cd test ; $(MAKE) veryclean
 
-docs:
-	@(cd doc ; $(MAKE))
-	
 check:
 	@(cd test ; $(MAKE))
