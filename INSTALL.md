@@ -50,7 +50,7 @@ sudo apt-get install nginx-extras
   ```
   cd ../render_expire
   ./autogen.sh
-  ./configure
+  ./configure --prefix=/opt/tileserver
   make
   sudo make
   ```
@@ -65,6 +65,13 @@ sudo apt-get install nginx-extras
 
   ```
   sudo ln -s /etc/nginx/sites-available/tileproxy-ssl /etc/nginx/sites-enabled/tileproxy-ssl
+  ```
+
+7. Create cache folder
+
+  ```
+  sudo mkdir /home/tilecache
+  sudo chmod 777 /home/tilecache
   ```
 
 8. Restart nginx
