@@ -7,10 +7,12 @@ Tested on Ubuntu 12.04 LTS
 If you only need tile proxy/cache server, just follow this instruction.
 And you can serve original local tile images placed X/Y/Z folder.
 
+Because the OpenStreetMap Japan team provide PPA for it, please use it.
+
 ## Install nginx
 
 ```
-sudo apt-add-repository ppa:miurahr/openstreetmap
+sudo apt-add-repository ppa:osmjapan/ppa
 sudo apt-get update
 sudo apt-get install nginx-extras
 ```
