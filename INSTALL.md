@@ -1,13 +1,13 @@
 Setup instruction of tilecache
 
-Tested on Ubuntu 12.04 LTS
+Tested on Ubuntu 12.04 LTS 64bit
 
-# Install Tilecache for using a proxy/cache server of tile.openstreetmap.org
+# Install Tilecache for using a proxy/cache server of tile.openstreetmap.jp
 
 If you only need tile proxy/cache server, just follow this instruction.
 And you can serve original local tile images placed X/Y/Z folder.
 
-Because the OpenStreetMap Japan team provide PPA for it, please use it.
+The OpenStreetMap Japan team provide Ubuntu PPA for it.
 
 ## Install nginx
 
@@ -28,7 +28,7 @@ sudo apt-get install nginx-extras
 2. Install libraries
 
   ```
-  sudo apt-get install lua-nginx-redis libiniparser-dev lua-bitop
+  sudo apt-get install libiniparser-dev lua-bitop
   ```
 
 3. Setup nginx configulation
@@ -110,25 +110,22 @@ sudo apt-get install nginx-extras
 You will need following softwares for serving original renderer.
 First it shows a test case for mapnik example-map tirex rendering configuration.
 Next it shows a practical environment with PostGIS/Mapnik/Tirex combination.
+There are PostGIS 2.0/Mapnik/Tirex packages on OSM Japan PPA. 
 
 ## Install Dependencies
 
 1. PostGIS 2.0 geo-spacial DBMS
 
   ```
-  sudo apt-get install python-software-properties
-  sudo apt-add-repository ppa:sharpie/for-science
-  sudo apt-add-repository ppa:sharpie/postgis-stable
-  sudo apt-add-repository ppa:ubuntugis/ubuntugis-unstable
+  sudo apt-add-repository ppa:osmjapan/ppa # if you did not add this yet
   sudo apt-get update
-  sudo apt-get install postgresql-9.1-postgis2
+  sudo apt-get install python-software-properties
+  sudo apt-get install postgresql-9.1-postgis
   ```
 
 2. Mapnik rendering library
 
   ```
-  sudo apt-add-repository ppa:miurahr/openstreetmap # if you did not add this yet
-  sudo apt-get update
   sudo apt-get install libmapnik-dev
   ```
 
@@ -143,9 +140,9 @@ Next it shows a practical environment with PostGIS/Mapnik/Tirex combination.
 4. Importing tools
 
   ```
-  # osm2pgsql, osmoisis
+  # osm2pgsql, osmoisis, imposm
   sudo apt-get install default-java # if not installed
-  sudo apt-get install osm2pgsql osmosis
+  sudo apt-get install osm2pgsql osmosis imposm
   ```
 
 ## example-map rendering server
@@ -188,67 +185,11 @@ Next it shows a practical environment with PostGIS/Mapnik/Tirex combination.
   ```
 
   You can see rendered tile, using url 'http://tileserver/0/0/0.png'
-  It will be a world coast lines.
-
-## Original rendering configutaion
-
+  It will be a world coast lines in zoom 0.
+  
   Now you can challenge your own rendering server.
   You need to prepare mapnik style for its work.
-  A recommended start point is here.
   
+  Further instruction is in doc/custom_style.md
   
-1. Get OpenStreetMap Japan mapnik style.
-
-  ```
-  git clone https://github.com/osmfj/mapnik-stylesheets.git
-  ```
-  
-2. fork it for your own style.
-
-  ```
-  git checkout -b <new-cool-style-for-my-map> master
-  ```
-
-   please replace <new-cool-style-for-my-map> with your favorite branch name
-   
-3. get coast line
-
-  ```
-  get_coastline.sh
-  ```
-  or use package
-  ```
-  apt-get install openstreetmap-mapnik-world-boundaries
-  ```
-  
-4. Edit style in XML
-
-   TBD
-   
-5. locate your custom osm template
-
-  ```
-  cp osm.xml /opt/tileserver/share/
-  ```
-  
-6. add tirex configuration
-
-  ```
-  vi /etc/tirex/render/mapnik/custom.conf
-  ##
-  #  Configuration for Mapnik custom map.
-  #  /etc/tirex/renderer/mapnik/custom.conf
-  ##
-  #  symbolic name of this map
-  name=custom
-  
-  #  tile directory
-  tiledir=/var/lib/tirex/tiles/example
-
-  #  zoom level allowed
-  minz=0
-  maxz=19
-  
-  mapfile=/opt/tilesrever/share/osm.xml
-  ```
 
