@@ -109,40 +109,24 @@ sudo apt-get install nginx-extras
 
 You will need following softwares for serving original renderer.
 First it shows a test case for mapnik example-map tirex rendering configuration.
-Next it shows a practical environment with PostGIS/Mapnik/Tirex combination.
-There are PostGIS 2.0/Mapnik/Tirex packages on OSM Japan PPA. 
 
 ## Install Dependencies
 
-1. PostGIS 2.0 geo-spacial DBMS
+1. Mapnik rendering library
 
   ```
   sudo apt-add-repository ppa:osmjapan/ppa # if you did not add this yet
   sudo apt-get update
   sudo apt-get install python-software-properties
-  sudo apt-get install postgresql-9.1-postgis
-  ```
-
-2. Mapnik rendering library
-
-  ```
   sudo apt-get install libmapnik-dev
   ```
 
-3. Tirex rendering engine
+2. Tirex rendering engine
 
   ```
   sudo apt-get install tirex-core tirex-backend-mapnik \
        tirex-backend-wms tirex-example-map tirex-munin-plugin \
        tirex-nagios-plugin tirex-syncd
-  ```
-
-4. Importing tools
-
-  ```
-  # osm2pgsql, osmoisis, imposm
-  sudo apt-get install default-java # if not installed
-  sudo apt-get install osm2pgsql osmosis imposm
   ```
 
 ## example-map rendering server
@@ -158,7 +142,6 @@ There are PostGIS 2.0/Mapnik/Tirex packages on OSM Japan PPA.
   ```
   sudo ln -s /etc/nginx/sites-available/tileserver_ssl /etc/nginx/sites-enabled/tileserver_ssl
   ```
-
 
 2. restert nginx
 
@@ -187,9 +170,34 @@ There are PostGIS 2.0/Mapnik/Tirex packages on OSM Japan PPA.
   You can see rendered tile, using url 'http://tileserver/0/0/0.png'
   It will be a world coast lines in zoom 0.
   
+
+## OpenStreetMap planet data and rendering
+  
   Now you can challenge your own rendering server.
-  You need to prepare mapnik style for its work.
+  You need to prepare PostGIS and mapnik style for its work.
   
+1. PostGIS 2.0 geo-spacial DBMS
+
+  ```
+  sudo apt-get install postgresql-9.1-postgis
+  ```
+
+2. Importing tools
+
+  ```
+  # osm2pgsql, osmoisis, imposm
+  sudo apt-get install default-java # if not installed
+  sudo apt-get install osm2pgsql osmosis imposm
+  ```
+
+3. OpenStreetMap data setup
+
+  ```
+  sudo apt-get install openstreetmap-postgis-db-setup openstreetmap-mapnik-data
+  ```
+
+4. mapnik openstreetmap style and more
+
   Further instruction is in doc/custom_style.md
-  
+  It shows a practical environment with PostGIS/Mapnik/Tirex combination.
 

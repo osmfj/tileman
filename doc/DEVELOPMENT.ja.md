@@ -74,8 +74,8 @@ mod_tile相当とは
 Running environment
 =============
 
-* 環境は、Ubuntu 11.10(64bit)です。
-* Nightly buildのmapnikを使っています。[*5]
+* 環境は、Ubuntu 12.04 LTS (64bit)です。
+* mapnik 2.1を使っています。
 * nginxは、nginx-extra packageを使います。
 * Osmosis は、Wiki[*8]からLatest Stable Versionをダウンロードし、/opt/osmosisに展開します。
 * luaからredisデータベースへのアクセスは、OpenRestyのLua-redis[*6]モジュールを使います。
@@ -83,23 +83,13 @@ Running environment
 * redis-server パッケージを導入します。(apt-get install redis-server)
 * 必要なdirectoryを掘ります。
 
-参考 Mapnik2.2ビルド
----
-
-最新版のmapnikをgit等で取り寄せて、パッケージをつくるときは、
-パッケージ生成用のツールがあるので、参考にすると良い。
-
-- https://github.com/mapnik/mapnik-packaging/tree/master/debian-nightlies
-
-
 Install
 ==========
 
 上記実行環境を整えたあと、
 
     $ git clone git://github.com/osmfj/tilecache.git
-    $ cd tilecache
-    $ (cd pkgs; sudo dpkg -i lua-nginx-redis_0.15-1_all.deb)
+    $ sudo apt-get install lua-nginx-redis
 
 これで、redisにアクセスできる環境ができます。このパッケージはUbuntu raringからしか提供されていないので、同梱されています。
 
@@ -137,7 +127,6 @@ External Links
 * [*2] http://wiki.openstreetmap.org/wiki/Tirex
 * [*3] http://wiki.openstreetmap.org/wiki/Mapnik
 * [*4] http://nginx.org/ja/
-* [*5] https://launchpad.net/~mapnik/+archive/nightly-trunk
 * [*6] https://github.com/agentzh/lua-resty-redis
 * [*7] http://wiki.openstreetmap.org/wiki/Tirex/Building_and_Installing
 * [*8] http://wiki.openstreetmap.org/wiki/Osmosis
