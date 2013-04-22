@@ -2,7 +2,7 @@
 ==================================
 
 
-前提は、Ubuntu 11.10(amd64)サーバです。
+前提は、Ubuntu 12.04 LTS (amd64)サーバです。
 
 ソフトウエアインストール
 ------------------------
@@ -11,7 +11,7 @@ aptでgit, nginxを入れてください。nginxは1.2.x版が必要です。
 また、nginx-extras に含まれる組み込みLua言語が、
 最新の0.7.xバージョンである必要があります。
 
-    $ sudo apt-add-repositry ppa:miurahr/nginx 
+    $ sudo apt-add-repositry ppa:osmjapan/ppa 
     $ sudo apt-get update
     $ sudo apt-get install git nginx-extras
 
