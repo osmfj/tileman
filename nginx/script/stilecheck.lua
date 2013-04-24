@@ -1,5 +1,5 @@
 require "tilecheck"
 
 if ngx.var.own_tile == "no" then
-  return ngx.exec("@tilecache")
+  return ngx.exit(ngx.HTTP_NOT_ALLOWED)
 end
