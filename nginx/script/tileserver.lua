@@ -184,7 +184,7 @@ function send_tile_tirex (map, x, y, z, id)
 
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["id"]:sub(1,signature:len()) ~= signature then
-        -- XXX: something wrong
+        ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
         return
     end
 
@@ -193,7 +193,7 @@ function send_tile_tirex (map, x, y, z, id)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
         ngx.log(ngx.INFO, "tirex: metatile open error: ", err)
-        return ngx.exec("@tilecache") -- fallback to upstream
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     else
         local stats = ngx.shared.stats
         stats:incr("tiles_rendered", 1)
