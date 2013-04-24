@@ -2,17 +2,20 @@
 #
 server {
   listen 443;
-  server_name a.tile.openstreetmap.jp b.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  server_name tile;
 
-  access_log  /var/log/nginx/tileproxy_ssl_access.log combined;
-  error_log   /var/log/nginx/tileproxy_ssl_error.log info;
+  #access_log  /var/log/nginx/tileproxy_ssl_access.log combined;
+  #error_log   /var/log/nginx/tileproxy_ssl_error.log info;
 
   include ssl_params;
   include common_location_params;
+  include tileserver_params;
 
   location / {
-    include tileserver_params;
+    # check xyz valid
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
+
+    # proxy and cache tiles
     include tileproxy_params;
     proxy_set_header X_FORWARDED_PROTO http;
     proxy_pass http://openstreetmap_backend;

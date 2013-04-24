@@ -3,24 +3,14 @@ server {
   server_name tileserver j.tile.openstreetmap.jp k.tile.openstreetmap.jp;
   root   /var/www;
 
-  access_log  /var/log/nginx/tileserver_access.log combined;
-  error_log   /var/log/nginx/tileserver_error.log info;
+  #access_log  /var/log/nginx/tileserver_access.log combined;
+  #error_log   /var/log/nginx/tileserver_error.log info;
 
   include common_location_params;
   include tileserver_params;
 
   location / {
-    access_by_lua_file /etc/nginx/script/stilecheck.lua;
-    root /var/opt/tileserver/static;
-    try_files $uri $uri/ @tileserver;
-  }
-
-  location @tileserver {
+    access_by_lua_file /etc/nginx/script/tilecheck.lua;
     content_by_lua_file /etc/nginx/script/tileserver.lua; 
-  }
-
-  location @tilecache {
-    include tileproxy_params;
-    proxy_pass http://openstreetmap_backend;
   }
 }

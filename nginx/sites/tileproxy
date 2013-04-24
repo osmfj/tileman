@@ -1,16 +1,19 @@
 server {
   listen 80;
-  server_name tile tile.openstreetmap.jp a.tile.openstreetmap.jp b.tile.openstreetmap.jp *.tile.openstreetmap.org;
+  server_name tile;
   root   /var/www;
 
-  access_log  /var/log/nginx/tileproxy_access.log combined;
-  error_log   /var/log/nginx/tileproxy_error.log info;
+  #access_log  /var/log/nginx/tileproxy_access.log combined;
+  #error_log   /var/log/nginx/tileproxy_error.log info;
 
   include common_location_params;
   include tileserver_params;
 
   location / {
+    # check xyz valid
     access_by_lua_file /etc/nginx/script/tilecheck.lua; 
+
+    # proxy and cache tiles
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;
   }
