@@ -25,6 +25,7 @@ metatile = 8
 signature = "luats"
 tirexsock = 'unix:/var/run/tirex/master.sock'
 tirextile = "/var/lib/tirex/tiles/"
+mapname='example'
 
 -- function: serialize_tirex_msg
 -- argument: table msg
@@ -130,7 +131,7 @@ end
 -- return string filename
 --
 function get_imgfile (map, x, y, z)
-    local imgfile = "/var/lib/tirex/tiles/"
+    local imgfile = tirextile
     if map == nil or map == "" then
         imgfile = imgfile..xyz_to_filename(x, y, z)
     else
@@ -149,8 +150,9 @@ end
 --
 function send_tile_tirex (map, x, y, z, id)
     local udpsock = ngx.socket.udp()
+    local socketpath = tirexsock
     udpsock:settimeout(1000)
-    local ok, err = udpsock:setpeername('unix:/var/run/tirex/master.sock')
+    local ok, err = udpsock:setpeername(socketpath)
     if not ok then
         ngx.log(ngx.ERR, "udpsock setpeername error")
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
@@ -222,7 +224,7 @@ if id == nil then
     id = 0
 end
 
-local map = 'example' -- FIXME
+local map = mapname
 local x = ngx.var.x
 local y = ngx.var.y
 local z = ngx.var.z
