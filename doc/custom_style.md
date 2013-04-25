@@ -25,7 +25,7 @@ How to configure custom style
 4. get coast line
 
   ```
-  cd 
+  cd ~/mapnik-stylesheets # or whatever directory you put the project in
   get_coastline.sh
   ```
   
@@ -33,28 +33,75 @@ How to configure custom style
 
    TBD
    
-6. locate your custom osm template
+6. Generate your custom mapnik rules
 
   ```
-  cd ~/mapnik-stylesheets # or whatever directory you put the project in
-  wget http://tile.openstreetmap.org/world_boundaries-spherical.tgz
-  wget http://tile.openstreetmap.org/processed_p.tar.bz2
-  wget http://tile.openstreetmap.org/shoreline_300.tar.bz2
-  wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/10m/cultural/ne_10m_populated_places.zip
-  wget http://www.naturalearthdata.com/http//www.naturalearthdata.com/download/110m/cultural/ne_110m_admin_0_boundary_lines_land.zip
-  tar xzf world_boundaries-spherical.tgz
-  tar xjf processed_p.tar.bz2 -C world_boundaries
-  tar xjf shoreline_300.tar.bz2 -C world_boundaries
-  unzip ne_110m_admin_0_boundary_lines_land.zip -d world_boundaries
-  unzip ne_10m_populated_places.zip -d world_boundaries
-  cd world_boundaries
-  ln -s ne_110m_admin_0_boundary_lines_land.shp 110m_admin_0_boundary_lines_land.shp
-  ln -s ne_110m_admin_0_boundary_lines_land.dbf 110m_admin_0_boundary_lines_land.dbf
-  cd ..
-  ./generate_xml.py --host localhost --port 5432 --user osm --password '' --dbname gis --symbols ./symbols/ --world_boundaries ./world_boundaries/ osm.xml > myosm.xml
+  ./generate_xml.py --host localhost --port 5432 --user osm --password '' --dbname gis --symbols ./symbols/ --world_boundaries ./world_boundaries/ osm.xml > custom.xml
   ```
   
-7. add tirex configuration
+7. Modify custom template for local language
+  Now tweaking the Mapnik rules to render the tiles in a local language. For this all we need to do is point Mapnik to the right font. You can quickly follow the steps briefed by Richard.
+
+  You can run
+  
+  ```
+    python
+    >>> from mapnik import *
+    >>> for face in FontEngine.face_names(): print face
+    … [Enter]
+
+    DejaVu Sans Bold
+    DejaVu Sans Bold Oblique
+    DejaVu Sans Book
+    DejaVu Sans Condensed
+    DejaVu Sans Condensed Bold
+    DejaVu Sans Condensed Bold Oblique
+    DejaVu Sans Condensed Oblique
+    DejaVu Sans ExtraLight
+    DejaVu Sans Mono Bold
+    DejaVu Sans Mono Oblique
+
+    ……………………………………..
+
+    >>> Ctrl-d
+  ```
+  
+  to see what fonts are currently being recognized by Mapnik. The second task is to install the local language unicode font to Mapnik’s default font directory. If you have already installed Mapnik, you can run strace -ff, and search for font to see which directory is used by Mapnik. In my case it was the default directory at /usr/share/fonts/
+  
+  Next, you need to copy the required fonts to the above directory.
+
+  edit the Mapnik custom rule file, as described below.  The file begins with something like this.
+
+  ```
+    <FontSet name=”bold-fonts”>
+    <Font face_name=”DejaVu Sans Bold”></Font>
+    </FontSet>
+    <FontSet name=”book-fonts”>
+    <Font face_name=”DejaVu Sans Book”></Font>
+    </FontSet>
+    <FontSet name=”oblique-fonts”>
+    <Font face_name=”DejaVu Sans Oblique”></Font>
+    </FontSet>
+  ```
+  
+  Change the face_name to the font name we just copied to the fonts directory.  In my case, it would look like this.
+  ```
+    <FontSet name=”bold-fonts”>
+    <Font face_name=”Rachana Regular”></Font>
+    </FontSet>
+    <FontSet name=”book-fonts”>
+    <Font face_name=”Rachana Regular”></Font>
+    </FontSet>
+    <FontSet name=”oblique-fonts”>
+    <Font face_name=”Rachana Regular”></Font>
+    </FontSet>
+  ```
+  OK, now we copy the file to proper place
+  ```
+  cp custom.xml /opt/tileserver/share
+  ```
+
+8. add tirex configuration
 
   ```
   vi /etc/tirex/render/mapnik/custom.conf
@@ -72,6 +119,9 @@ How to configure custom style
   minz=0
   maxz=19
   
-  mapfile=/opt/tilesrever/share/myosm.xml
+  mapfile=/opt/tileserver/share/custom.xml
   ```
+
+9. restart tirex-backend-master and test!
+
 
