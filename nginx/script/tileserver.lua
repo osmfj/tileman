@@ -73,7 +73,7 @@ function xyz_to_filename (ox, oy, z)
 
     for i=0, 4 do
         v = bit.band(x, 0x0f)
-        v = bit.rshift(v, 4)
+        v = bit.lshift(v, 4)
         v = bit.bor(v, bit.band(y, 0x0f))
         x = bit.rshift(x, 4)
         y = bit.rshift(y, 4)
