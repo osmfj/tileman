@@ -77,7 +77,7 @@ function xyz_to_filename (ox, oy, z)
         v = bit.bor(v, bit.band(y, 0x0f))
         x = bit.rshift(x, 4)
         y = bit.rshift(y, 4)
-        res = res..'/'..tostring(v)
+        res = '/'..tostring(v)..res
     end
     return tostring(z)..res..'.meta'
 end
