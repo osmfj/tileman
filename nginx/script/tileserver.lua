@@ -29,7 +29,7 @@ local tirex_shmem = 120000
 
 -- vals from nginx conf
 --
-local map = mgx.var.map
+local map = ngx.var.map
 local x = ngx.var.x
 local y = ngx.var.y
 local z = ngx.var.z
@@ -167,25 +167,26 @@ function get_imgfilename (map, x, y, z)
 end
 
 
--- function: register_result(msg)
+-- function: register_result
 --
 --
-function register_result(msg)
-    local index = string.format("%d:%d:%d",msg["x"],msg["y"],msg["z"])
-    local succ, err, forcible = tirex:set(index, msg["id"], tirex_shmem)
+function register_result(map, mx, my, z)
+    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
+    tirex:add(index, 0)
+    tirex:incr(index, 1, tirex_shmem)
 end
 
--- function: wait_result(id)
+-- function: wait_result
 --
 --
-function wait_result(x, y, z, id)
+function wait_result(map, x, y, z)
     --- XXX metatile = 8
     local mx = x - x % 8
     local my = y - y % 8
-    local index = string.format("%d:%d:%d",mx, my, z)
+    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
     for i=0, 6 do -- wait 5*6 = 30sec
         local val, flag = tirex:get(index)
-        if val then
+        if val and val >= 1 then
             return send_imgfile(map, x, y, z)
         end
         ngx.sleep(5)
@@ -233,22 +234,22 @@ function send_tile_tirex (map, x, y, z, priority, id)
     udpsock:close()
     if not data then
         -- wait result 30sec
-        return wait_result(map, x, y, z, id)
+        return wait_result(map, x, y, z)
     end
 
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["result"] ~= "ok" then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
-
-    register_result(msg)
+    
+    register_result(map, msg["x"],msg["y"],msg["z"])
     stats:incr("tiles_rendered", 1)
 
     if tostring(msg["id"]) == tostring(id) then
         return send_imgfile(map, x, y, z)
     else
         -- wait result 30sec
-        return wait_result(map, x, y, z, id)
+        return wait_result(map, x, y, z)
     end
 end
 
@@ -259,7 +260,6 @@ function init_shmem()
     stats:add("tiles_requested",0)
     stats:add("tiles_from_cache",0)
     stats:add("tiles_rendered",0)
-    tirex:flush_expired()
 end
 
 -- main routine
