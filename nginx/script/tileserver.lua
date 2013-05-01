@@ -18,14 +18,12 @@
 --    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 --
 
+-- required module
 local bit = require 'bit'
 
 -- constants
 --
 local metatile = 8
-local tirexsock = 'unix:/var/run/tirex/master.sock'
-local tirextile = "/var/lib/tirex/tiles/"
-local tirex_shmem = 120000
 
 -- vals from nginx conf
 --
@@ -37,6 +35,17 @@ local z = ngx.var.z
 -- shared dictionary
 --
 local stats = ngx.shared.stats
+
+-- ---------------------------------------------------------------
+-- Tirex Interface
+--
+-- ---------------------------------------------------------------
+local tirexsock = 'unix:/var/run/tirex/master.sock'
+local tirextile = "/var/lib/tirex/tiles/"
+local tirex_shmem_timeout = 120000
+
+-- shared dictionary
+--
 local tirex = ngx.shared.tirex
 
 -- function: serialize_tirex_msg
@@ -68,6 +77,97 @@ function deserialize_tirex_msg (str)
     end
     return msg
 end
+
+-- function: register_result
+--
+--
+function register_result(map, mx, my, z)
+    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
+    tirex:add(index, 0, tirex_shmem_timeout, 0)
+    tirex:incr(index, 1)
+end
+
+-- function: wait_result
+--
+--
+function wait_result(map, x, y, z)
+    --- XXX metatile = 8
+    local mx = x - x % 8
+    local my = y - y % 8
+    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
+    for i=0, 6 do -- wait 5*6 = 30sec
+        local val, flag = tirex:get(index)
+        if val then
+            return send_imgfile(map, x, y, z)
+        end
+        ngx.sleep(5)
+    end
+    return nil
+end
+
+-- funtion: send_tile_tilrex
+-- argument: filedescriptor udp
+--           string map
+--           number x, y, z
+-- return:  void
+--
+-- it send back tile to client
+--
+function send_tile_tirex (map, x, y, z, priority, id)
+    local udpsock = ngx.socket.udp()
+    local socketpath = tirexsock
+    udpsock:settimeout(10000) -- FIXME
+
+    local ok, err = udpsock:setpeername(socketpath)
+    if not ok then
+        ngx.log(ngx.ERR, "udpsock setpeername error")
+        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
+    end
+
+    local mx = x - x % 8 -- metatile:8
+    local my = y - y % 8
+    local req = serialize_tirex_msg({
+        ["id"]   = tostring(id);
+        ["type"] = 'metatile_enqueue_request';
+        ["prio"] = priority;
+        ["map"]  = map;
+        ["x"]    = mx;
+        ["y"]    = my;
+        ["z"]    = z})
+
+    local ok, err = udpsock:send(req)
+    if not ok then
+        ngx.log(ngx.ERR, "tirex: Command send error")
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+    end
+
+    local data, err = udpsock:receive()
+    udpsock:close()
+    if not data then
+        -- wait result 30sec
+        return wait_result(map, x, y, z)
+    end
+
+    local msg = deserialize_tirex_msg(tostring(data))
+    if msg["result"] ~= "ok" then
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+    end
+
+    register_result(map, msg["x"],msg["y"],msg["z"])
+    stats:incr("tiles_rendered", 1)
+
+    if tostring(msg["id"]) == tostring(id) then
+        return send_imgfile(map, x, y, z)
+    else
+        -- wait result 30sec
+        return wait_result(map, x, y, z)
+    end
+end
+
+-- ---------------------------------------------------------------
+-- Metatile routines
+--
+-- ---------------------------------------------------------------
 
 -- function: xyz_to_filename
 -- arguments: int x, y, z
@@ -167,92 +267,10 @@ function get_imgfilename (map, x, y, z)
 end
 
 
--- function: register_result
+-- ---------------------------------------------------------------
+-- The main routine
 --
---
-function register_result(map, mx, my, z)
-    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    tirex:add(index, 0, tirex_shmem, 0)
-    tirex:incr(index, 1)
-end
-
--- function: wait_result
---
---
-function wait_result(map, x, y, z)
-    --- XXX metatile = 8
-    local mx = x - x % 8
-    local my = y - y % 8
-    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    for i=0, 6 do -- wait 5*6 = 30sec
-        local val, flag = tirex:get(index)
-        if val and val >= 1 then
-            return send_imgfile(map, x, y, z)
-        end
-        ngx.sleep(5)
-    end
-    return nil
-end
-
--- funtion: send_tile_tilrex
--- argument: filedescriptor udp
---           string map
---           number x, y, z
--- return:  void
---
--- it send back tile to client
---
-function send_tile_tirex (map, x, y, z, priority, id)
-    local udpsock = ngx.socket.udp()
-    local socketpath = tirexsock
-    udpsock:settimeout(10000) -- FIXME
-
-    local ok, err = udpsock:setpeername(socketpath)
-    if not ok then
-        ngx.log(ngx.ERR, "udpsock setpeername error")
-        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
-    end
-
-    local mx = x - x % 8 -- metatile:8
-    local my = y - y % 8
-    local req = serialize_tirex_msg({
-        ["id"]   = tostring(id);
-        ["type"] = 'metatile_enqueue_request';
-        ["prio"] = priority;
-        ["map"]  = map;
-        ["x"]    = mx;
-        ["y"]    = my;
-        ["z"]    = z})
-
-    local ok, err = udpsock:send(req)
-    if not ok then
-        ngx.log(ngx.ERR, "tirex: Command send error")
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    end
-
-    local data, err = udpsock:receive()
-    udpsock:close()
-    if not data then
-        -- wait result 30sec
-        ngx.log(ngx.INFO, "tileserver: udp socket timeout, but wait other thread to get it...")
-        return wait_result(map, x, y, z)
-    end
-
-    local msg = deserialize_tirex_msg(tostring(data))
-    if msg["result"] ~= "ok" then
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    end
-    
-    register_result(map, msg["x"],msg["y"],msg["z"])
-    stats:incr("tiles_rendered", 1)
-
-    if tostring(msg["id"]) == tostring(id) then
-        return send_imgfile(map, x, y, z)
-    else
-        -- wait result 30sec
-        return wait_result(map, x, y, z)
-    end
-end
+-- ---------------------------------------------------------------
 
 -- init shared memory dictionay.
 -- add keys when don't exist
@@ -266,8 +284,6 @@ end
 -- main routine
 --
 --
-local stats=ngx.shared.stats
-
 init_shmem()
 stats:incr("http_requests", 1)
 local id = stats:incr("tiles_requested", 1)
