@@ -172,8 +172,8 @@ end
 --
 function register_result(map, mx, my, z)
     local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    tirex:add(index, 0)
-    tirex:incr(index, 1, tirex_shmem)
+    tirex:add(index, 0, tirex_shmem, 0)
+    tirex:incr(index, 1)
 end
 
 -- function: wait_result
@@ -234,6 +234,7 @@ function send_tile_tirex (map, x, y, z, priority, id)
     udpsock:close()
     if not data then
         -- wait result 30sec
+        ngx.log(ngx.INFO, "tileserver: udp socket timeout, but wait other thread to get it...")
         return wait_result(map, x, y, z)
     end
 
