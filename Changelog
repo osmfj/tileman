@@ -1,0 +1,26 @@
+*1.0 Beta3 (2013.5.1)
+
+ - Refactoring 
+ 
+ - Fix udp error (#22)
+   Tirex server accept duplicate requests but get away it.
+   And return single response for request.
+   Because tileserver wait by each, some recv() fails with timeout.
+   
+   Now it sometimes show timeout error, but working well.
+
+*1.0 Beta2 (2013.4.30)
+
+ - fix MetaTile path error. that cause the tile server totaly useless.
+ - update documents
+ - fix geoip logic
+ - fix install scripts
+ - external library now goes PPA
+ - some cleanup
+ 
+*1.0 Beta1 (2013.4.10)
+
+ - first beta.
+ - works well for tile cache server.
+ - static tile replacement is also working
+ - not tested for tile server.
