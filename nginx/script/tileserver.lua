@@ -25,35 +25,8 @@ local bit = require 'bit'
 --
 local metatile = 8
 
--- vals from nginx conf
---
-local map = ngx.var.map
-local x = ngx.var.x
-local y = ngx.var.y
-local z = ngx.var.z
 
-
--- ---------------------------------------------------------------
--- shmem Interface
---
--- ---------------------------------------------------------------
---
 local stats = ngx.shared.stats
-
--- init shared memory dictionay.
--- add keys when don't exist
---
-function init_shmem()
-    stats:add("http_requests", 0)
-    stats:add("tiles_requested",0)
-    stats:add("tiles_from_cache",0)
-    stats:add("tiles_rendered",0)
-end
-
-
-function shmem_get_token(key, value, timeout, flags)
-    return stats:add(index, 0, tirex_shmem_timeout, id)
-end
 
 -- ---------------------------------------------------------------
 -- Tirex Interface
@@ -62,10 +35,6 @@ end
 local tirexsock = 'unix:/var/run/tirex/master.sock'
 local tirextile = "/var/lib/tirex/tiles/"
 local tirex_shmem_timeout = 120 -- should be in sec
-
--- shared dictionary
---
-local tirex = ngx.shared.tirex
 
 -- function: serialize_tirex_msg
 -- argument: table msg
@@ -97,6 +66,10 @@ function deserialize_tirex_msg (str)
     return msg
 end
 
+function get_key(map, mx, my, mz)
+    return string.format("%s:%d:%d:%d",map, mx, my, mz)
+end
+
 -- function: register tirex handle
 --    check whether other coroutine have already process with tirex
 --    if not, register itself and return id
@@ -110,13 +83,8 @@ end
 --                 3 - unknown status
 --
 function register_handle(map, mx, my, z, id)
-    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    local ok, err = tirex:add(index, 0, tirex_shmem_timeout, id)
-    if not ok then
-        ngx.log(ngx.ERR, "tileserver: invalid state: ", err)
-        return nil
-    end
-    return id
+    local index = get_key(map, mx, my, z)
+    return stats:safe_add(index, 0, tirex_shmem_timeout, id)
 end
 
 -- function: register_result
@@ -124,8 +92,9 @@ end
 --    set shared.tirex to '1' - success
 --
 function register_result(map, mx, my, z)
-    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    local ok, err = tirex:incr(index, 1)
+    local index = get_key(map, mx, my, z)
+    stats:incr("tiles_rendered", 1)
+    return stats:incr(index, 1)
 end
 
 -- function: wait_result
@@ -133,17 +102,14 @@ end
 --    check whether shared.tirex is '1' - success
 --         if '0' - wait and check in 30 sec
 --            '1' - return id
---             timeout or '>=2' return nil
 --
-function wait_result(map, mx, my, z)
-    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    for i=0, 6 do -- wait 5*6 = 30sec
-        local val, id = tirex:get(index)
+function wait_result(map, mx, my, mz)
+    local index = get_key(map, mx, my, mz)
+    for i=0, 5 do -- watch 30sec
+        local val, id = stats:get(index)
         if val then
-            if val == 1 then
+            if val > 0 then
                 return id
-            else if val > 1 then
-                return nil
             end
             ngx.sleep(5)
         else -- no waiting index... invalid
@@ -156,7 +122,7 @@ end
 -- function: request_tirex_render
 --
 
-function request_tirex_render(map, mx, my, z, id)
+function request_tirex_render(map, mx, my, mz, id)
     local udpsock = ngx.socket.udp()
     local socketpath = tirexsock
     udpsock:settimeout(30000) -- FIXME
@@ -174,7 +140,7 @@ function request_tirex_render(map, mx, my, z, id)
         ["map"]  = map;
         ["x"]    = mx;
         ["y"]    = my;
-        ["z"]    = z})
+        ["z"]    = mz})
 
     local ok, err = udpsock:send(req)
     if not ok then
@@ -188,16 +154,11 @@ function request_tirex_render(map, mx, my, z, id)
     if msg["result"] ~= "ok" then
         return nil
     end
-    local rx = msg["x"]
-    local ry = msg["y"]
-    local rz = msg["z"]
-    register_result(map, rx,ry,rz)
-    stats:incr("tiles_rendered", 1)
-    if rx == mz && ry == my && rz == z then
-        return ngx.OK
-    else
-        return nil
+    local ok,err = register_result(map, mx, my, mz)
+    if not ok then
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
+    return ngx.OK
 end
 
 -- funtion: send_tile_tilrex
@@ -206,28 +167,22 @@ end
 --           number x, y, z
 -- return:   if ok ngx.OK, not ok nil
 --
-function send_tile_tirex (map, x, y, z)
+function send_tirex_request (map, x, y, z)
     local mx = x - x % 8 -- metatile:8
     local my = y - y % 8
-    local id = stats:incr("tiles_requested", 1)
-    if id == nil then
-        ngx.log(ngx.WARN, "ngx.shared.Dict: stats access error")
-        id = 0
+    local id = ngx.time()
+    local ok, err = register_handle(map, mx, my, z, id)
+    if not ok then
+        -- someone have already start Tirex session
+        -- wait other side
+        return wait_result(map, mx, my, z) -- id or nil
     end
-    local res = register_handle(map, mx, my, z, id)
-    if not res then
-        return nil
-    else
-        local ok = request_tirex_render(map, mx, my, z,id)
-        if not ok then
-            ok = wait_result(map, mx, my, z)
-            if not ok then
-                return nil
-            end
-        end
-    end
-    return ngx.OK
+
+    -- now start Tirex session
+    return request_tirex_render(map, mx, my, z, id)
 end
+
+
 
 -- ---------------------------------------------------------------
 -- Metatile routines
@@ -239,13 +194,10 @@ end
 -- return: filename of metatile
 -- global: metatile(8) metatile multiplexity
 --
-function xyz_to_filename (ox, oy, z) 
+function xyz_to_filename (x, y, z) 
     local res=''
-    local x = tonumber(ox)
-    local y = tonumber(oy)
     local v = 0
     -- make sure we have metatile coordinates
-    -- XXX
     local mx = x - x % 8
     local my = y - y % 8
 
@@ -274,19 +226,15 @@ end
 -- return:
 -- description: send back tile image to client
 --
-function send_image (fd, sx, sy, z)
+function send_image (fd, x, y, z)
     local metatile_header_size = 20 + 8 * 64 -- XXX: 532
-    local x = tonumber(sx)
-    local y = tonumber(sy)
     local header, err = fd:read(metatile_header_size)
     if header == nil then
         fd:close()
         ngx.log(ngx.ERR, "File read error: ",err)
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
-
     -- offset into lookup table in header
-    --- XXX: metatile = 8
     local pib = 20 + ((y % 8) * 8) + ((x % 8) * 8 * 8 )
     local offset = get_offset(header, pib)
     local size = get_offset(header, pib+4)
@@ -301,19 +249,6 @@ function send_image (fd, sx, sy, z)
     ngx.header.content_type = 'image/png'
     ngx.print(png)
     return
-end
-
-function send_imgfile(map, x, y, z)
-    local imgfile = get_imgfilename(map, x, y, z)
-    ngx.log(ngx.DEBUG, "Meta file path: ",imgfile)
-    local fd, err = io.open(imgfile,"rb")
-    if fd == nil then
-        return nil
-    else
-        send_image(fd, x, y, z)
-        fd:close()
-    end
-    return ngx.OK
 end
 
 -- function: get_imgfilename
@@ -332,28 +267,49 @@ function get_imgfilename (map, x, y, z)
 end
 
 
+function send_tile(map, x, y, z)
+    local imgfile = get_imgfilename(map, x, y, z)
+    local fd, err = io.open(imgfile,"rb")
+    if fd == nil then
+        return nil
+    end
+    send_image(fd, x, y, z)
+    fd:close()
+    return ngx.OK
+end
+
+
+
 -- ---------------------------------------------------------------
 -- The main routine
 --
 -- ---------------------------------------------------------------
 -- main routine
+-- vals from nginx conf
 --
---
-stats = init_shmem()
-stats:incr("http_requests", 1)
+local map = ngx.var.map
+local x = tonumber(ngx.var.x)
+local y = tonumber(ngx.var.y)
+local z = tonumber(ngx.var.z)
+
 -- try renderd file.
-local ok = send_imgfile(map, x, y, z)
+local ok = send_tile(map, x, y, z)
 if ok then
-    stats:incr("tiles_from_cache", 1)
     return ngx.OK
 end
 
 -- ask tirex to render it
-local ok = send_tile_tirex(map, x, y, z)
+local ok = send_tirex_request(map, x, y, z)
 if not ok then
    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
-local ok = send_imgfile(map, x, y, z)
+
+local ok = send_tile(map, x, y, z)
+if not ok then
+    return ngx.exit(ngx.HTTP_NOT_FOUND)
+end
+
+return ngx.OK
 
 -- vi:nosi:sw=4:ts=4
 -- EOF --
