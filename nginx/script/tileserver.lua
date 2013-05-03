@@ -166,11 +166,11 @@ function request_tirex_render(map, mx, my, mz, id)
     end
     udpsock:send(req)
     local data, err = udpsock:receive()
+    udpsock:close()
     if not data then
-        ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz)
+        ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz, err)
         return nil
     end
-    udpsock:close()
 
     -- check result
     local msg = deserialize_msg(tostring(data))
@@ -198,7 +198,7 @@ function send_tirex_request (map, x, y, z)
     if not ok then
         -- someone have already start Tirex session
         -- wait other side(*), sync..
-        return wait_result(index, 30)
+        return wait_signal(index, 30)
     end
 
     -- Start Tirex session
