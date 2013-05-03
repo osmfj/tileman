@@ -25,9 +25,6 @@ local bit = require 'bit'
 --
 local metatile = 8
 
-
-local stats = ngx.shared.stats
-
 -- ---------------------------------------------------------------
 -- Tirex Interface
 --
@@ -35,6 +32,13 @@ local stats = ngx.shared.stats
 local tirexsock = 'unix:/var/run/tirex/master.sock'
 local tirextile = "/var/lib/tirex/tiles/"
 local tirex_shmem_timeout = 120 -- should be in sec
+local stats = ngx.shared.stats
+
+
+-- ------------------------------
+-- Packet construction
+--
+-- ------------------------------
 
 -- function: serialize_tirex_msg
 -- argument: table msg
@@ -66,6 +70,11 @@ function deserialize_tirex_msg (str)
     return msg
 end
 
+-- ------------------------------
+-- Syncronize interface
+--
+-- ------------------------------
+
 function get_key(map, mx, my, mz)
     return string.format("%s:%d:%d:%d",map, mx, my, mz)
 end
@@ -79,10 +88,8 @@ end
 --       key: map:mz:my:z 
 --       value:    0 - someone get handle
 --                 1 - rendering successed
---                 2 - rendering fails
---                 3 - unknown status
 --
-function register_handle(map, mx, my, z, id)
+function get_handle(map, mx, my, z, id)
     local index = get_key(map, mx, my, z)
     return stats:safe_add(index, 0, tirex_shmem_timeout, id)
 end
@@ -91,9 +98,8 @@ end
 --
 --    set shared.tirex to '1' - success
 --
-function register_result(map, mx, my, z)
+function send_signal(map, mx, my, z)
     local index = get_key(map, mx, my, z)
-    stats:incr("tiles_rendered", 1)
     return stats:incr(index, 1)
 end
 
@@ -119,19 +125,16 @@ function wait_result(map, mx, my, mz)
     return nil
 end
 
--- function: request_tirex_render
+-- ------------------------------
+-- socket interface
 --
+-- ------------------------------
 
+-- function: request_tirex_render
+--  enqueue request to tirex server thru unix domain socket datagram
+--
 function request_tirex_render(map, mx, my, mz, id)
-    local udpsock = ngx.socket.udp()
-    local socketpath = tirexsock
-    udpsock:settimeout(30000) -- FIXME
-
-    local ok, err = udpsock:setpeername(socketpath)
-    if not ok then
-        ngx.log(ngx.ERR, "udpsock setpeername error")
-        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
-    end
+    -- Create request command
     local priority = 8
     local req = serialize_tirex_msg({
         ["id"]   = tostring(id);
@@ -142,44 +145,64 @@ function request_tirex_render(map, mx, my, mz, id)
         ["y"]    = my;
         ["z"]    = mz})
 
-    local ok, err = udpsock:send(req)
+    -- send request to Tirex master socket
+    local udpsock = ngx.socket.udp()
+    local socketpath = tirexsock
+    local ok, err = udpsock:setpeername(socketpath)
     if not ok then
-        ngx.log(ngx.ERR, "tirex: Command send error")
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+        ngx.log(ngx.ERR, "udpsock setpeername error")
+        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
+    udpsock:send(req)
     local data, err = udpsock:receive()
-    udpsock:close()
-
-    local msg = deserialize_tirex_msg(tostring(data))
-    if msg["result"] ~= "ok" then
+    if not data
+        ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz)
         return nil
     end
-    local ok,err = register_result(map, mx, my, mz)
-    if not ok then
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+    udpsock:close()
+
+    -- check result
+    local msg = deserialize_tirex_msg(tostring(data))
+    if not msg then -- something wrong
+        return nil
+    end
+    if msg["result"] ~= "ok" then
+        return nil
     end
     return ngx.OK
 end
 
--- funtion: send_tile_tilrex
--- argument: filedescriptor udp
---           string map
---           number x, y, z
--- return:   if ok ngx.OK, not ok nil
+-- ------------------------------
+-- control request
+--
+-- ------------------------------
+
+-- funtion: send_tirex_request
+-- argument: map, x, y, z
+-- return:   if ok ngx.OK, if not ok then nil
 --
 function send_tirex_request (map, x, y, z)
-    local mx = x - x % 8 -- metatile:8
+    local mx = x - x % 8
     local my = y - y % 8
+    local mz = z
     local id = ngx.time()
-    local ok, err = register_handle(map, mx, my, z, id)
+    local ok, err = get_handle(map, mx, my, z, id)
     if not ok then
         -- someone have already start Tirex session
-        -- wait other side
-        return wait_result(map, mx, my, z) -- id or nil
+        -- wait other side(*), sync..
+        return wait_result(map, mx, my, mz)
     end
-
-    -- now start Tirex session
-    return request_tirex_render(map, mx, my, z, id)
+    -- Start Tirex session
+    local ok = request_tirex_render(map, mx, my, mz, id)
+    if not ok then
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+    end
+    -- We got new metatile. signal to who waiting above(*)
+    local ok,err = send_signal(map, mx, my, mz)
+    if not ok then
+        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+    end
+    return ngx.OK
 end
 
 
@@ -192,15 +215,12 @@ end
 -- function: xyz_to_filename
 -- arguments: int x, y, z
 -- return: filename of metatile
--- global: metatile(8) metatile multiplexity
 --
 function xyz_to_filename (x, y, z) 
     local res=''
     local v = 0
-    -- make sure we have metatile coordinates
     local mx = x - x % 8
     local my = y - y % 8
-
     for i=0, 4 do
         v = bit.band(mx, 0x0f)
         v = bit.lshift(v, 4)
@@ -220,37 +240,6 @@ function get_offset (buffer, offset)
     return ((buffer:byte(offset+4) * 256 + buffer:byte(offset+3)) * 256 + buffer:byte(offset+2)) * 256 + buffer:byte(offset+1)
 end
 
--- function: send_image
--- arugments: metatile file descriptor fd
---            number x, y, z
--- return:
--- description: send back tile image to client
---
-function send_image (fd, x, y, z)
-    local metatile_header_size = 20 + 8 * 64 -- XXX: 532
-    local header, err = fd:read(metatile_header_size)
-    if header == nil then
-        fd:close()
-        ngx.log(ngx.ERR, "File read error: ",err)
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    end
-    -- offset into lookup table in header
-    local pib = 20 + ((y % 8) * 8) + ((x % 8) * 8 * 8 )
-    local offset = get_offset(header, pib)
-    local size = get_offset(header, pib+4)
-    fd:seek("set", offset)
-    local png, err = fd:read(size)
-    if png == nil then
-        fd:close()
-        ngx.log(ngx.ERR, "File read error: ", err)
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    end
-
-    ngx.header.content_type = 'image/png'
-    ngx.print(png)
-    return
-end
-
 -- function: get_imgfilename
 -- arguments: string map
 --            number x, y, z
@@ -266,19 +255,41 @@ function get_imgfilename (map, x, y, z)
     return imgfile
 end
 
-
+-- function send_tile
+-- arguments map, x, y, z
+-- return ngx.OK or nil
+-- 
+--  send back tile to client from metatile
+--
 function send_tile(map, x, y, z)
     local imgfile = get_imgfilename(map, x, y, z)
     local fd, err = io.open(imgfile,"rb")
     if fd == nil then
         return nil
     end
-    send_image(fd, x, y, z)
+    local metatile_header_size = 532 -- XXX: 20 + 8 * 64
+    local header, err = fd:read(metatile_header_size)
+    if header == nil then
+        fd:close()
+        ngx.log(ngx.ERR, "File read error: ",err)
+        return nil
+    end
+    -- offset: lookup table in header
+    local pib = 20 + ((y % 8) * 8) + ((x % 8) * 8 * 8 )
+    local offset = get_offset(header, pib)
+    local size = get_offset(header, pib+4)
+    fd:seek("set", offset)
+    local png, err = fd:read(size)
+    if png == nil then
+        fd:close()
+        ngx.log(ngx.ERR, "File read error: ", err)
+        return nil
+    end
+    ngx.header.content_type = 'image/png'
+    ngx.print(png)
     fd:close()
     return ngx.OK
 end
-
-
 
 -- ---------------------------------------------------------------
 -- The main routine
