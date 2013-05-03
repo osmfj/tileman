@@ -31,7 +31,7 @@ local metatile = 8
 -- ---------------------------------------------------------------
 local tirexsock = 'unix:/var/run/tirex/master.sock'
 local tirextile = "/var/lib/tirex/tiles/"
-local tirex_shmem_timeout = 120 -- should be in sec
+local tirex_shmem_timeout = 240 -- should be in sec
 local stats = ngx.shared.stats
 
 
