@@ -32,9 +32,28 @@ local x = ngx.var.x
 local y = ngx.var.y
 local z = ngx.var.z
 
--- shared dictionary
+
+-- ---------------------------------------------------------------
+-- shmem Interface
+--
+-- ---------------------------------------------------------------
 --
 local stats = ngx.shared.stats
+
+-- init shared memory dictionay.
+-- add keys when don't exist
+--
+function init_shmem()
+    stats:add("http_requests", 0)
+    stats:add("tiles_requested",0)
+    stats:add("tiles_from_cache",0)
+    stats:add("tiles_rendered",0)
+end
+
+
+function shmem_get_token(key, value, timeout, flags)
+    return stats:add(index, 0, tirex_shmem_timeout, id)
+end
 
 -- ---------------------------------------------------------------
 -- Tirex Interface
@@ -42,7 +61,7 @@ local stats = ngx.shared.stats
 -- ---------------------------------------------------------------
 local tirexsock = 'unix:/var/run/tirex/master.sock'
 local tirextile = "/var/lib/tirex/tiles/"
-local tirex_shmem_timeout = 120000
+local tirex_shmem_timeout = 120 -- should be in sec
 
 -- shared dictionary
 --
@@ -78,54 +97,76 @@ function deserialize_tirex_msg (str)
     return msg
 end
 
+-- function: register tirex handle
+--    check whether other coroutine have already process with tirex
+--    if not, register itself and return id
+--    otherwise, return nil
+--
+--    ngx.shared.tirex
+--       key: map:mz:my:z 
+--       value:    0 - someone get handle
+--                 1 - rendering successed
+--                 2 - rendering fails
+--                 3 - unknown status
+--
+function register_handle(map, mx, my, z, id)
+    local index = string.format("%s:%d:%d:%d",map, mx, my, z)
+    local ok, err = tirex:add(index, 0, tirex_shmem_timeout, id)
+    if not ok then
+        ngx.log(ngx.ERR, "tileserver: invalid state: ", err)
+        return nil
+    end
+    return id
+end
+
 -- function: register_result
 --
+--    set shared.tirex to '1' - success
 --
 function register_result(map, mx, my, z)
     local index = string.format("%s:%d:%d:%d",map, mx, my, z)
-    tirex:add(index, 0, tirex_shmem_timeout, 0)
-    tirex:incr(index, 1)
+    local ok, err = tirex:incr(index, 1)
 end
 
 -- function: wait_result
 --
+--    check whether shared.tirex is '1' - success
+--         if '0' - wait and check in 30 sec
+--            '1' - return id
+--             timeout or '>=2' return nil
 --
-function wait_result(map, x, y, z)
-    --- XXX metatile = 8
-    local mx = x - x % 8
-    local my = y - y % 8
+function wait_result(map, mx, my, z)
     local index = string.format("%s:%d:%d:%d",map, mx, my, z)
     for i=0, 6 do -- wait 5*6 = 30sec
-        local val, flag = tirex:get(index)
+        local val, id = tirex:get(index)
         if val then
-            return send_imgfile(map, x, y, z)
+            if val == 1 then
+                return id
+            else if val > 1 then
+                return nil
+            end
+            ngx.sleep(5)
+        else -- no waiting index... invalid
+            return nil
         end
-        ngx.sleep(5)
     end
     return nil
 end
 
--- funtion: send_tile_tilrex
--- argument: filedescriptor udp
---           string map
---           number x, y, z
--- return:  void
+-- function: request_tirex_render
 --
--- it send back tile to client
---
-function send_tile_tirex (map, x, y, z, priority, id)
+
+function request_tirex_render(map, mx, my, z, id)
     local udpsock = ngx.socket.udp()
     local socketpath = tirexsock
-    udpsock:settimeout(10000) -- FIXME
+    udpsock:settimeout(30000) -- FIXME
 
     local ok, err = udpsock:setpeername(socketpath)
     if not ok then
         ngx.log(ngx.ERR, "udpsock setpeername error")
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
-
-    local mx = x - x % 8 -- metatile:8
-    local my = y - y % 8
+    local priority = 8
     local req = serialize_tirex_msg({
         ["id"]   = tostring(id);
         ["type"] = 'metatile_enqueue_request';
@@ -140,28 +181,52 @@ function send_tile_tirex (map, x, y, z, priority, id)
         ngx.log(ngx.ERR, "tirex: Command send error")
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
-
     local data, err = udpsock:receive()
     udpsock:close()
-    if not data then
-        -- wait result 30sec
-        return wait_result(map, x, y, z)
-    end
 
     local msg = deserialize_tirex_msg(tostring(data))
     if msg["result"] ~= "ok" then
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
+        return nil
     end
-
-    register_result(map, msg["x"],msg["y"],msg["z"])
+    local rx = msg["x"]
+    local ry = msg["y"]
+    local rz = msg["z"]
+    register_result(map, rx,ry,rz)
     stats:incr("tiles_rendered", 1)
-
-    if tostring(msg["id"]) == tostring(id) then
-        return send_imgfile(map, x, y, z)
+    if rx == mz && ry == my && rz == z then
+        return ngx.OK
     else
-        -- wait result 30sec
-        return wait_result(map, x, y, z)
+        return nil
     end
+end
+
+-- funtion: send_tile_tilrex
+-- argument: filedescriptor udp
+--           string map
+--           number x, y, z
+-- return:   if ok ngx.OK, not ok nil
+--
+function send_tile_tirex (map, x, y, z)
+    local mx = x - x % 8 -- metatile:8
+    local my = y - y % 8
+    local id = stats:incr("tiles_requested", 1)
+    if id == nil then
+        ngx.log(ngx.WARN, "ngx.shared.Dict: stats access error")
+        id = 0
+    end
+    local res = register_handle(map, mx, my, z, id)
+    if not res then
+        return nil
+    else
+        local ok = request_tirex_render(map, mx, my, z,id)
+        if not ok then
+            ok = wait_result(map, mx, my, z)
+            if not ok then
+                return nil
+            end
+        end
+    end
+    return ngx.OK
 end
 
 -- ---------------------------------------------------------------
@@ -271,27 +336,11 @@ end
 -- The main routine
 --
 -- ---------------------------------------------------------------
-
--- init shared memory dictionay.
--- add keys when don't exist
-function init_shmem()
-    stats:add("http_requests", 0)
-    stats:add("tiles_requested",0)
-    stats:add("tiles_from_cache",0)
-    stats:add("tiles_rendered",0)
-end
-
 -- main routine
 --
 --
-init_shmem()
+stats = init_shmem()
 stats:incr("http_requests", 1)
-local id = stats:incr("tiles_requested", 1)
-if id == nil then
-    ngx.log(ngx.WARN, "ngx.shared.Dict: stats access error")
-    id = 0
-end
-
 -- try renderd file.
 local ok = send_imgfile(map, x, y, z)
 if ok then
@@ -300,11 +349,11 @@ if ok then
 end
 
 -- ask tirex to render it
-local priority = 8
-local ok = send_tile_tirex(map, x, y, z, priority, id)
+local ok = send_tile_tirex(map, x, y, z)
 if not ok then
    return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
 end
+local ok = send_imgfile(map, x, y, z)
 
 -- vi:nosi:sw=4:ts=4
 -- EOF --
