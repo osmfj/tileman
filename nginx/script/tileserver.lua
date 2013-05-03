@@ -26,27 +26,19 @@ local bit = require 'bit'
 local metatile = 8
 
 -- ---------------------------------------------------------------
--- Tirex Interface
+-- Utility functions
 --
+-- serialize/deserialize
+-- bet table <-> string 
 -- ---------------------------------------------------------------
-local tirexsock = 'unix:/var/run/tirex/master.sock'
-local tirextile = "/var/lib/tirex/tiles/"
-local tirex_shmem_timeout = 240 -- should be in sec
-local stats = ngx.shared.stats
 
-
--- ------------------------------
--- Packet construction
---
--- ------------------------------
-
--- function: serialize_tirex_msg
+-- function: serialize_msg
 -- argument: table msg
 --     hash table {key1=val1, key2=val2,....}
 -- return: string
 --     should be 'key1=val1\nkey2=val2\n....\n'
 --
-function serialize_tirex_msg (msg)
+function serialize_msg (msg)
     local str = ''
     for k,v in pairs(msg) do
         str = str .. k .. '=' .. tostring(v) .. '\n'
@@ -54,12 +46,12 @@ function serialize_tirex_msg (msg)
     return str
 end
 
--- function: deserialize_tirex_msg
+-- function: deserialize_msg
 -- arguments: string str: recieved message from tirex
 --     should be 'key1=val1\nkey2=val2\n....\n'
 -- return: table
 --     hash table {key1=val1, key2=val2,....}
-function deserialize_tirex_msg (str) 
+function deserialize_msg (str) 
     local msg = {}
     for line in string.gmatch(str, "[^\n]+") do
         m,_,k,v = string.find(line,"([^=]+)=(.+)")
@@ -70,65 +62,84 @@ function deserialize_tirex_msg (str)
     return msg
 end
 
--- ------------------------------
--- Syncronize interface
---
--- ------------------------------
 
-function get_key(map, mx, my, mz)
-    return string.format("%s:%d:%d:%d",map, mx, my, mz)
+-- ------------------------------------
+-- Syncronize thread functions
+--
+--   thread(1)
+--       get_handle(key)
+--       do work
+--       store work result somewhere
+--       send_signal(key)
+--       return result
+--
+--   thread(2)
+--       get_handle(key) fails then
+--       wait_singal(key)
+--       return result what thread(1) done
+--
+--   to syncronize amoung nginx threads
+--   we use ngx.shared.DICT interface.
+--   
+--   Here we use ngx.shared.stats
+--   you need to set /etc/conf.d/lua.conf
+--      ngx_shared_dict stats 10m; 
+--
+--   if these functions returns 'nil'
+--   status is undefined
+--   something wrong
+--
+--   status definitions
+--    key is not exist:    neutral
+--    key is exist: someone got work token
+--       val = 0:     now working
+--       val > 0:     work is finished
+--
+--    key will be expired in timeout sec
+--    we can use same key after timeout passed
+--
+-- ------------------------------------
+local stats = ngx.shared.stats
+
+--
+--  if key exist, it returns false
+--  else it returns true
+--
+function get_handle(key,timeout, flag)
+    return stats:safe_add(key, 0, timeout, flag)
 end
 
--- function: register tirex handle
---    check whether other coroutine have already process with tirex
---    if not, register itself and return id
---    otherwise, return nil
---
---    ngx.shared.tirex
---       key: map:mz:my:z 
---       value:    0 - someone get handle
---                 1 - rendering successed
---
-function get_handle(map, mx, my, z, id)
-    local index = get_key(map, mx, my, z)
-    return stats:safe_add(index, 0, tirex_shmem_timeout, id)
+-- returns new value (maybe 1)
+function send_signal(key)
+    return stats:incr(key, 1)
 end
 
--- function: register_result
+-- return nil if timeout in wait
 --
---    set shared.tirex to '1' - success
---
-function send_signal(map, mx, my, z)
-    local index = get_key(map, mx, my, z)
-    return stats:incr(index, 1)
-end
-
--- function: wait_result
---
---    check whether shared.tirex is '1' - success
---         if '0' - wait and check in 30 sec
---            '1' - return id
---
-function wait_result(map, mx, my, mz)
-    local index = get_key(map, mx, my, mz)
-    for i=0, 5 do -- watch 30sec
-        local val, id = stats:get(index)
+function wait_signal(key,timeout)
+    local interval = 1
+    local timeout = tonumber(timeout)
+    for i=0, timeout do
+        local val, id = stats:get(key)
         if val then
             if val > 0 then
                 return id
             end
-            ngx.sleep(5)
-        else -- no waiting index... invalid
+            ngx.sleep(interval)
+        else
             return nil
         end
     end
     return nil
 end
 
--- ------------------------------
--- socket interface
+-- ---------------------------------------------------------------
+-- Tirex Interface
 --
--- ------------------------------
+-- ---------------------------------------------------------------
+local tirexsock = 'unix:/var/run/tirex/master.sock'
+local tirextile = "/var/lib/tirex/tiles/"
+local tirex_sync_duration = 240 -- should be in sec
 
 -- function: request_tirex_render
 --  enqueue request to tirex server thru unix domain socket datagram
@@ -136,7 +147,7 @@ end
 function request_tirex_render(map, mx, my, mz, id)
     -- Create request command
     local priority = 8
-    local req = serialize_tirex_msg({
+    local req = serialize_msg({
         ["id"]   = tostring(id);
         ["type"] = 'metatile_enqueue_request';
         ["prio"] = priority;
@@ -155,14 +166,14 @@ function request_tirex_render(map, mx, my, mz, id)
     end
     udpsock:send(req)
     local data, err = udpsock:receive()
-    if not data
+    if not data then
         ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz)
         return nil
     end
     udpsock:close()
 
     -- check result
-    local msg = deserialize_tirex_msg(tostring(data))
+    local msg = deserialize_msg(tostring(data))
     if not msg then -- something wrong
         return nil
     end
@@ -171,11 +182,6 @@ function request_tirex_render(map, mx, my, mz, id)
     end
     return ngx.OK
 end
-
--- ------------------------------
--- control request
---
--- ------------------------------
 
 -- funtion: send_tirex_request
 -- argument: map, x, y, z
@@ -186,26 +192,29 @@ function send_tirex_request (map, x, y, z)
     local my = y - y % 8
     local mz = z
     local id = ngx.time()
-    local ok, err = get_handle(map, mx, my, z, id)
+    local index = string.format("%s:%d:%d:%d",map, mx, my, mz)
+
+    local ok, err = get_handle(index, tirex_sync_duration, id)
     if not ok then
         -- someone have already start Tirex session
         -- wait other side(*), sync..
-        return wait_result(map, mx, my, mz)
+        return wait_result(index, 30)
     end
+
     -- Start Tirex session
     local ok = request_tirex_render(map, mx, my, mz, id)
     if not ok then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
+
     -- We got new metatile. signal to who waiting above(*)
-    local ok,err = send_signal(map, mx, my, mz)
+    local ok,err = send_signal(index)
     if not ok then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
+
     return ngx.OK
 end
-
-
 
 -- ---------------------------------------------------------------
 -- Metatile routines
