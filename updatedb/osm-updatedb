@@ -26,6 +26,12 @@ OSM2PGSQL_BIN=${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
 PSQL_BIN=${PSQL_BIN:=/usr/bin/psql}
 EXPIRE_ZOOM=${EXPIRE_ZOOM:=15}
 
+RENDER_EXPIRED_BIN=${RENDER_EXPIRED_BIN:=/opt/tileserver/bin/render_expired}
+TILEDIR=${TILEDIR:=/var/lib/tirex/tiles}
+MODTILE_SOCK=${MODTILE_SOCK:=/var/lib/tirex/modtile.sock}
+MAPNAME=${MAPNAME:=custom}
+CONCURRENCY=${CONCURRENCY:=2}
+
 OSC_PIPE=/tmp/changes_osc.$$
 EXPIRE_PIPE=/tmp/expire_list.$$
 
@@ -60,11 +66,15 @@ function check_exec () {
      echo "Error: $OSM2PGSQL_BIN doesn't exist."
      echo
      exit 1
+  elif [ ! -x $RENDER_EXPIRED_BIN ] ; then
+     echo "Error: $RENDER_EXPIRED_BIN doesn't exist."
+     echo
+     exit 1
   fi
 }
 
 
-while getopts "bcdhv" opts; do
+while getopts "bcdhuv" opts; do
     case $opts in 
     c)
     CLEAN_FLAG=yes
@@ -83,12 +93,16 @@ while getopts "bcdhv" opts; do
     echo "'-b': clwan-up out-of-bounding-box ways"
     echo "'-c': compact size of PostGIS."
     echo "'-d': show debug messages"
+    echo "'-u': launch expire_rended to refresh expired tile"
     echo "'-v': show version"
     exit 0
     ;;
     v)
     echo "$0: get osm change file and update postgis db"
     exit 0
+    ;;
+    u)
+    TILE_UPDATE_FLAG=yes
     ;;
     esac
 done
@@ -98,10 +112,17 @@ shift $((OPTIND - 1))
 check_exec
 mkfifo $OSC_PIPE
 mkfifo $EXPIRE_PIPE
-$OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
-$OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
+if [ "${TILE_UPDATE_FLAG}" = "yes" ]; then
+  $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
+  $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_PIPE $OSC_PIPE &
+  cat $EXPIRE_PIPE | $RENDER_EXPIRED_BIN -t $TILEDIR -m "$MAPNAME" -s MODTILE_SOCK -n $CONCURRENCY
+else
+  $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
+  $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
+fi
 rm -f $OSC_PIPE
 rm -f $EXPIRE_PIPE
+
 if [ "${CLEAN_OUTOFBB_FLAG}" = "yes" ]; then
   cleanup_bbox
 fi
