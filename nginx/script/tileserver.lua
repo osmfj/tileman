@@ -187,7 +187,7 @@ function tirex_command(req)
     local data, err = udpsock:receive(tirex_cmd_max_size)
     udpsock:close()
     if not data then
-        ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz, err)
+        ngx.log(ngx.ERR, "timeout ", err)
         return nil
     end
     -- check result
