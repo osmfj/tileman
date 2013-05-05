@@ -140,9 +140,11 @@ end
 local tirexsock = 'unix:/var/run/tirex/master.sock'
 local tirextile = "/var/lib/tirex/tiles/"
 local tirex_sync_duration = 240 -- should be in sec
+local tirex_cmd_max_size = 512
+local tirex_resp_timeout = 30000
 
 -- function: request_tirex_render
---  enqueue request to tirex server thru unix domain socket datagram
+--  enqueue request to tirex server
 --
 function request_tirex_render(map, mx, my, mz, id)
     -- Create request command
@@ -155,29 +157,46 @@ function request_tirex_render(map, mx, my, mz, id)
         ["x"]    = mx;
         ["y"]    = my;
         ["z"]    = mz})
+     return tirex_command(req)
+end
 
+-- function request_tirex_debug
+--   debug request to tirex server
+function request_tirex_debug()
+    local req = serialize_msg({
+        ["id"]=tostoring(ngx.time());
+        ["type"]="debug"
+    })
+    return tirex_command(req)
+end
+
+-- function: tirex_command
+--  send command to tirex server thru unix domain socket datagram
+--
+function tirex_command(req)
     -- send request to Tirex master socket
     local udpsock = ngx.socket.udp()
     local socketpath = tirexsock
+    udpsock:setitimeout(tirex_resp_timeout)
     local ok, err = udpsock:setpeername(socketpath)
     if not ok then
         ngx.log(ngx.ERR, "udpsock setpeername error")
         return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
     end
     udpsock:send(req)
-    local data, err = udpsock:receive()
+    local data, err = udpsock:receive(tirex_cmd_max_size)
     udpsock:close()
     if not data then
         ngx.log(ngx.ERR, "timeout ", mx, " ", my, " ", mz, err)
         return nil
     end
-
     -- check result
     local msg = deserialize_msg(tostring(data))
-    if not msg then -- something wrong
+    if next(msg) == nil then -- something wrong
         return nil
     end
     if msg["result"] ~= "ok" then
+        ngx.log(ngx.ERR, "Tirex fails by ", msg["result"], " id: ", msg["id"])
         return nil
     end
     return ngx.OK
@@ -311,11 +330,16 @@ local map = ngx.var.map
 local x = tonumber(ngx.var.x)
 local y = tonumber(ngx.var.y)
 local z = tonumber(ngx.var.z)
+local debug = nil
 
 -- try renderd file.
 local ok = send_tile(map, x, y, z)
 if ok then
     return ngx.OK
+end
+
+if debug then
+    request_tirex_debug()
 end
 
 -- ask tirex to render it
