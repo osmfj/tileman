@@ -177,7 +177,7 @@ function tirex_command(req)
     -- send request to Tirex master socket
     local udpsock = ngx.socket.udp()
     local socketpath = tirexsock
-    udpsock:setitimeout(tirex_resp_timeout)
+    udpsock:settimeout(tirex_resp_timeout)
     local ok, err = udpsock:setpeername(socketpath)
     if not ok then
         ngx.log(ngx.ERR, "udpsock setpeername error")
