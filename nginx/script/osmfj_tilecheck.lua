@@ -113,5 +113,5 @@ end
 
 local inside = check_region(region, x, y, z)
 if not inside then
-      return ngx.exit(ngx.HTTP_SEE_OTHER)
+    ngx.location.capture("/tilecache")
 end

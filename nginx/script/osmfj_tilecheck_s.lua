@@ -69,5 +69,5 @@ ngx.var.y = oy
 ngx.var.z = oz
 
 if ngx.var.own_tile == "no" then
-  return ngx.exit(ngx.HTTP_NOT_ALLOWED)
+  ngx.location.capture("/tileserver")
 end
