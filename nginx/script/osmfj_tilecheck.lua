@@ -107,6 +107,10 @@ ngx.var.x = ox
 ngx.var.y = oy
 ngx.var.z = oz
 
+if z < 5 then -- low zoom use global site cache 
+    return ngx.exit(ngx.HTTP_SEE_OTHER)
+end
+
 local inside = check_region(region, x, y, z)
 if not inside then
       return ngx.exit(ngx.HTTP_SEE_OTHER)
