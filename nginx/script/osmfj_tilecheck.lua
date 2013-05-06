@@ -20,6 +20,45 @@
 --
 local bit = require 'bit'
 
+local region = {
+    {x1=153.890100, y1=26.382110, x2=131.691500, y2=21.209920},
+    {x1=131.691500, y1=21.209920, x2=122.595400, y2=23.519660},
+    {x1=122.595400, y1=23.519660, x2=122.560700, y2=25.841460},
+    {x1=122.560700, y1=25.841460, x2=128.814500, y2=34.748350},
+    {x1=128.814500, y1=34.748350, x2=129.396600, y2=35.094030},
+    {x1=129.396600, y1=35.094030, x2=140.576900, y2=45.706480},
+    {x1=140.576900, y1=45.706480, x2=149.189100, y2=45.802450},
+    {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
+   }
+   
+local region2 = { -- cannot check because it is too complex
+    {x1=153.890100, y1=26.382110, x2=132.152900, y2=26.468090},
+    {x1=132.152900, y1=26.468090, x2=131.691500, y2=21.209920},
+    {x1=131.691500, y1=21.209920, x2=122.595400, y2=23.519660},
+    {x1=122.595400, y1=23.519660, x2=122.560700, y2=25.841460},
+    {x1=122.560700, y1=25.841460, x2=128.814500, y2=34.748350},
+    {x1=128.814500, y1=34.748350, x2=129.396600, y2=35.094030},
+    {x1=129.396600, y1=35.094030, x2=135.307900, y2=37.547400},
+    {x1=135.307900, y1=37.547400, x2=140.576900, y2=45.706480},
+    {x1=140.576900, y1=45.706480, x2=149.189100, y2=45.802450},
+    {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
+   }
+
+function check_region(region, x, y, z)
+    local target = true
+    local n = 2 ^ z
+    local lon_deg = x / n * 360.0 - 180.0
+    local lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    local lat_deg = lat_rad * 180.0 / math.pi
+    for k, v in pairs(region) do
+        local result = (v.y1 - v.y2) * lon_deg + (v.x2 - v.x1) * lat_deg+ v.x1 * v.y2 - v.x2 * v.y1
+        if result > 0 then
+            target = nil
+        end
+    end
+    return target
+end
+
 -- FIXME: need to check integlity and existence of external parameters
 -- minz, maxz, allow_jpg, url_rule
 --
@@ -68,6 +107,7 @@ ngx.var.x = ox
 ngx.var.y = oy
 ngx.var.z = oz
 
-if ngx.var.own_tile == "no" then
-  return ngx.exit(ngx.HTTP_NOT_ALLOWED)
+local inside = check_region(region, x, y, z)
+if not inside then
+      return ngx.exit(ngx.HTTP_SEE_OTHER)
 end
