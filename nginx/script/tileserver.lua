@@ -100,12 +100,12 @@ end
 --
 -- ------------------------------------
 
+local stats = ngx.shared.stats
 --
 --  if key exist, it returns false
 --  else it returns true
 --
 function get_handle(key,timeout, flag)
-    local stats = ngx.shared.stats
     local success,err,forcible = stats:add(key, 0, timeout, flag)
     if success ~= false then
         return key, ''
@@ -115,14 +115,12 @@ end
 
 -- returns new value (maybe 1)
 function send_signal(key)
-    local stats = ngx.shared.stats
     return stats:incr(key, 1)
 end
 
 -- return nil if timeout in wait
 --
 function wait_signal(key,timeout)
-    local stats = ngx.shared.stats
     local interval = 1
     local timeout = tonumber(timeout)
     for i=0, timeout do
@@ -150,11 +148,10 @@ local tirex_sync_duration = 240 -- should be in sec
 -- ========================================================
 --  It does not share context and global vals/funcs
 --
-local tirex_handler
 tirex_handler = function (premature)
     local tirexsock = 'unix:/var/run/tirex/master.sock'
     local tirex_cmd_max_size = 512
-    local tirex_resp_timeout = 20000
+    local tirex_resp_timeout = 30000
     
     local cmds = ngx.shared.cmds
     local stats = ngx.shared.stats
@@ -169,27 +166,25 @@ tirex_handler = function (premature)
         local req = cmds:get(index)
         udpsock:send(req)
         local data, err = udpsock:receive(tirex_cmd_max_size)
-        if not data then
+        if data then
+            -- deserialize
+            local msg = {}
+            for line in string.gmatch(data, "[^\n]+") do
+                m,_,k,v = string.find(line,"([^=]+)=(.+)")
+                if  k ~= '' then
+                    msg[k]=v
+                end
+            end
+            local resp = string.format("%s:%d:%d:%d", msg["map"], msg["x"], msg["y"], msg["z"])
+            -- send_signal to client context
+            local ok, err = stats:incr(resp, 1)
+            if not ok then
+                ngx.log(ngx.INFO, "error in incr")
+            end
+            cmds:delete(resp)
+        else
             ngx.log(ngx.INFO, "receive error", err)
         end
-
-   -- deserialize
-        local msg = {}
-        for line in string.gmatch(data, "[^\n]+") do
-            m,_,k,v = string.find(line,"([^=]+)=(.+)")
-            if  k ~= '' then
-                msg[k]=v
-            end
-        end
-
-        local resp = string.format("%s:%d:%d:%d", msg["map"], msg["x"], msg["y"], msg["z"])
-
-   -- send_signal to client context
-        ok, err = stats:incr(resp, 1)
-        if not ok then
-            ngx.log(ngx.INFO, "error in incr")
-        end
-        cmds:delete(resp)
     end
     udpsock:close()
     --
