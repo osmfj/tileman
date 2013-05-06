@@ -1,4 +1,4 @@
-Setup instruction of tilecache
+Setup instruction of tilecache/tileserver
 
 Tested on Ubuntu 12.04 LTS 64bit
 

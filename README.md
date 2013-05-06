@@ -7,10 +7,10 @@ Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
 Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
-- Nginx Web server (tested nginx v1.2.6 + lua-module 0.7.19)
+- Nginx Web server (tested on nginx v1.4.0 + lua-module 0.8.1)
   we provide PPA for ubuntu user. You need to select nginx-extras package.
 
-- Tirex, rendering backend
+- Tirex, rendering backend 0.4.1
 
 - PostGIS/postgresql 9.1
 
@@ -25,8 +25,8 @@ useful for other platform and who want to run osm tile server.
 Version
 ----
 
-Ver 1.0-beta1
-Release 11, April, 2013
+Ver 1.0-beta5
+Release: 7, May, 2013
 
 
 Install
