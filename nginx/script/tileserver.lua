@@ -106,7 +106,7 @@ local stats = ngx.shared.stats
 --  else it returns true
 --
 function get_handle(key,timeout, flag)
-    local success,err,forcible = stats:safe(key, 0, timeout, flag)
+    local success,err,forcible = stats:add(key, 0, timeout, flag)
     if success ~= false then
         return key, ''
     end
