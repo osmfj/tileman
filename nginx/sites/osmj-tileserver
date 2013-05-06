@@ -5,7 +5,7 @@
 #
 server {
   listen 80;
-  server_name j.tile.openstreetmap.jp k.tile.openstreetmap.jp;
+  server_name j.tile.openstreetmap.jp tile.openstreetmap.jp;
   root   /var/www;
 
   access_log  /var/log/nginx/tileserver_access.log combined;
@@ -20,14 +20,12 @@ server {
     try_files $uri $uri/ @tileserver;
   }
 
-  location /tileserver {
-    internal;
+  location @tileserver {
     access_by_lua_file /etc/nginx/script/osmfj_tilecheck.lua;
     content_by_lua_file /etc/nginx/script/tileserver.lua; 
   }
 
-  location /tilecache {
-    internal;
+  location @tilecache {
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;
   }

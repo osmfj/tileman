@@ -1,6 +1,6 @@
 server {
   listen 80;
-  server_name tileserver j.tile.openstreetmap.jp k.tile.openstreetmap.jp;
+  server_name tileserver;
   root   /var/www;
 
   #access_log  /var/log/nginx/tileserver_access.log combined;
