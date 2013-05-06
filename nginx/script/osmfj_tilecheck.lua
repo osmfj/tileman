@@ -30,6 +30,7 @@ local region = {
     {x1=140.576900, y1=45.706480, x2=149.189100, y2=45.802450},
     {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
    }
+local minmax = {minx =122.560700, miny = 21.209920 , maxx= 153.890100 ,maxy=45.802450}
    
 local region2 = { -- cannot check because it is too complex
     {x1=153.890100, y1=26.382110, x2=132.152900, y2=26.468090},
@@ -44,7 +45,12 @@ local region2 = { -- cannot check because it is too complex
     {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
    }
 
-function check_region(region, x, y, z)
+function check_region(region, minmax, x, y, z)
+    -- Preliminary check
+    if minmax.minx > x or minmax.maxx < x or minmax.miny > y or minmax.maxy < y then
+        return nil
+    end
+
     local target = true
     local n = 2 ^ z
     local lon_deg = x / n * 360.0 - 180.0
@@ -111,9 +117,9 @@ if z < 8 then -- low zoom use global site cache
     ngx.exec("@tilecache")
 end
 
-local inside = check_region(region, x, y, z)
+local inside = check_region(region, minmax, x, y, z)
 if not inside then
-   inside = check_region(region, x+1, y, z)
+   inside = check_region(region, minmax, x+1, y, z)
    if not inside then
        ngx.exec("@tilecache")
    end
