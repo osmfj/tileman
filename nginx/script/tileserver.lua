@@ -99,7 +99,6 @@ end
 --    we can use same key after timeout passed
 --
 -- ------------------------------------
-local stats = ngx.shared.stats
 
 --
 --  if key exist, it returns false
@@ -115,12 +114,14 @@ end
 
 -- returns new value (maybe 1)
 function send_signal(key)
+    local stats = ngx.shared.stats
     return stats:incr(key, 1)
 end
 
 -- return nil if timeout in wait
 --
 function wait_signal(key,timeout)
+    local stats = ngx.shared.stats
     local interval = 1
     local timeout = tonumber(timeout)
     for i=0, timeout do
@@ -141,17 +142,81 @@ end
 -- Tirex Interface
 --
 -- ---------------------------------------------------------------
-local tirexsock = 'unix:/var/run/tirex/master.sock'
+
 local tirextile = "/var/lib/tirex/tiles/"
 local tirex_sync_duration = 240 -- should be in sec
-local tirex_cmd_max_size = 512
-local tirex_resp_timeout = 30000
+
+-- ========================================================
+--  It does not share context and global vals/funcs
+--
+local tirex_hander
+tirex_handler = function (premature)
+    local tirexsock = 'unix:/var/run/tirex/master.sock'
+    local tirex_cmd_max_size = 512
+    local tirex_resp_timeout = 20000
+    
+    local cmds = ngx.shared.cmds
+    local stats = ngx.shared.stats
+    
+    local indexes = cmds:get_keys()
+    local udpsock = ngx.socket.udp()
+    udpsock:settimeout(tirex_resp_timeout)
+    udpsock:setpeername(tirexsock)
+
+    for key,index in pairs(indexes) do
+        -- send/receive request
+        local req = cmds:get(index)
+        udpsock:send(req)
+        local data, err = udpsock:receive(tirex_cmd_max_size)
+        if not data then
+            ngx.log(ngx.INFO, "receive error", err)
+        end
+
+   -- deserialize
+        local msg = {}
+        for line in string.gmatch(data, "[^\n]+") do
+            m,_,k,v = string.find(line,"([^=]+)=(.+)")
+            if  k ~= '' then
+                msg[k]=v
+            end
+        end
+
+        local resp = string.format("%s:%d:%d:%d", msg["map"], msg["x"], msg["y"], msg["z"])
+
+   -- send_signal to client context
+        ok, err = stats:incr(resp, 1)
+        if not ok then
+            ngx.log(ngx.INFO, "error in incr")
+        end
+        cmds:delete(resp)
+    end
+    udpsock:close()
+    --
+    -- call myself daemonized 
+    ngx.timer.at(0.01, tirex_handler)
+end
+-- ========================================================
+
+function push_request_tirex_render(index,req)
+    local cmds = ngx.shared.cmds
+    return cmds:safe_add(index, req, 0, 0)
+end
+
+function start_handler_if_needed()
+    local handle = get_handle('_tirex_handler', 0, 0)
+    if handle then
+        -- only single light thread can handle Tirex
+        ngx.log(ngx.INFO, "start tirex_handler")
+        ngx.timer.at(0, tirex_handler)
+    end
+end
 
 -- function: request_tirex_render
 --  enqueue request to tirex server
 --
 function request_tirex_render(map, mx, my, mz, id)
     -- Create request command
+    local index = string.format("%s:%d:%d:%d",map, mx, my, mz)
     local priority = 8
     local req = serialize_msg({
         ["id"]   = tostring(id);
@@ -161,48 +226,8 @@ function request_tirex_render(map, mx, my, mz, id)
         ["x"]    = mx;
         ["y"]    = my;
         ["z"]    = mz})
-     return tirex_command(req)
-end
-
--- function request_tirex_debug
---   debug request to tirex server
-function request_tirex_debug()
-    local req = serialize_msg({
-        ["id"]=tostoring(ngx.time());
-        ["type"]="debug"
-    })
-    return tirex_command(req)
-end
-
--- function: tirex_command
---  send command to tirex server thru unix domain socket datagram
---
-function tirex_command(req)
-    -- send request to Tirex master socket
-    local udpsock = ngx.socket.udp()
-    local socketpath = tirexsock
-    udpsock:settimeout(tirex_resp_timeout)
-    local ok, err = udpsock:setpeername(socketpath)
-    if not ok then
-        ngx.log(ngx.ERR, "udpsock setpeername error")
-        return ngx.exit(ngx.HTTP_SERVICE_UNAVAILABLE)
-    end
-    udpsock:send(req)
-    local data, err = udpsock:receive(tirex_cmd_max_size)
-    udpsock:close()
-    if not data then
-        ngx.log(ngx.ERR, "timeout ", err)
-        return nil
-    end
-    -- check result
-    local msg = deserialize_msg(tostring(data))
-    if next(msg) == nil then -- something wrong
-        return nil
-    end
-    if msg["result"] ~= "ok" then
-        ngx.log(ngx.ERR, "Tirex fails by ", msg["result"], " id: ", msg["id"])
-        return nil
-    end
+    push_request_tirex_render(index, req)
+    start_handler_if_needed()
     return ngx.OK
 end
 
@@ -224,19 +249,12 @@ function send_tirex_request (map, x, y, z)
         return wait_signal(index, 30)
     end
 
-    -- Start Tirex session
+    -- Ask Tirex session
     local ok = request_tirex_render(map, mx, my, mz, id)
     if not ok then
         return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
     end
-
-    -- We got new metatile. signal to who waiting above(*)
-    local ok,err = send_signal(index)
-    if not ok then
-        return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
-    end
-
-    return ngx.OK
+    return wait_signal(index, 30)
 end
 
 -- ---------------------------------------------------------------
@@ -334,16 +352,11 @@ local map = ngx.var.map
 local x = tonumber(ngx.var.x)
 local y = tonumber(ngx.var.y)
 local z = tonumber(ngx.var.z)
-local debug = nil
 
 -- try renderd file.
 local ok = send_tile(map, x, y, z)
 if ok then
     return ngx.OK
-end
-
-if debug then
-    request_tirex_debug()
 end
 
 -- ask tirex to render it
