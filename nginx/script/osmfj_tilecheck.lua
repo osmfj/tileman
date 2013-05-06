@@ -107,11 +107,14 @@ ngx.var.x = ox
 ngx.var.y = oy
 ngx.var.z = oz
 
-if z < 5 then -- low zoom use global site cache 
-    ngx.location.capture("/tilecache")
+if z < 8 then -- low zoom use global site cache 
+    ngx.exec("@tilecache")
 end
 
 local inside = check_region(region, x, y, z)
 if not inside then
-    ngx.location.capture("/tilecache")
+   inside = check_region(region, x+1, y, z)
+   if not inside then
+       ngx.exec("@tilecache")
+   end
 end

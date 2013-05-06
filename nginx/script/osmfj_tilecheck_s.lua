@@ -69,5 +69,5 @@ ngx.var.y = oy
 ngx.var.z = oz
 
 if ngx.var.own_tile == "no" then
-  ngx.location.capture("/tileserver")
+  ngx.exec("@tileserver")
 end
