@@ -175,7 +175,7 @@ tirex_handler = function (premature)
             if not ok then
                 ngx.log(ngx.INFO, "Send request error: ", err)
             else
-                cmds:delete(resp)
+                cmds:delete(req)
             end
         end
         -- then receive response
