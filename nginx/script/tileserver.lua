@@ -143,7 +143,9 @@ end
 -- ---------------------------------------------------------------
 
 local tirextile = "/var/lib/tirex/tiles/"
-local tirex_sync_duration = 240 -- should be in sec
+
+-- remove command recoard; tirex flushes queue in 5min
+local tirex_sync_duration = 600 -- should be in sec
 
 -- ========================================================
 --  It does not share context and global vals/funcs
@@ -151,20 +153,32 @@ local tirex_sync_duration = 240 -- should be in sec
 tirex_handler = function (premature)
     local tirexsock = 'unix:/var/run/tirex/master.sock'
     local tirex_cmd_max_size = 512
-    local tirex_resp_timeout = 30000
-    
     local cmds = ngx.shared.cmds
     local stats = ngx.shared.stats
-    
-    local indexes = cmds:get_keys()
+
+    if premature then
+        -- clean up
+        stats:delete('_tirex_handler')
+        return
+    end
+
     local udpsock = ngx.socket.udp()
-    udpsock:settimeout(tirex_resp_timeout)
+    udpsock:settimeout(300)
     udpsock:setpeername(tirexsock)
 
-    for key,index in pairs(indexes) do
-        -- send/receive request
-        local req = cmds:get(index)
-        udpsock:send(req)
+    for i = 0, 10000 do
+        -- send all requests first...
+        local indexes = cmds:get_keys()
+        for key,index in pairs(indexes) do
+            local req = cmds:get(index)
+            local ok,err=udpsock:send(req)
+            if not ok then
+                ngx.log(ngx.INFO, "Send request error: ", err)
+            else
+                cmds:delete(resp)
+            end
+        end
+        -- then receive response
         local data, err = udpsock:receive(tirex_cmd_max_size)
         if data then
             -- deserialize
@@ -181,15 +195,13 @@ tirex_handler = function (premature)
             if not ok then
                 ngx.log(ngx.INFO, "error in incr")
             end
-            cmds:delete(resp)
         else
             ngx.log(ngx.INFO, "receive error", err)
         end
     end
     udpsock:close()
-    --
-    -- call myself daemonized 
-    ngx.timer.at(0.01, tirex_handler)
+    -- call myself
+    ngx.timer.at(0, tirex_handler)
 end
 -- ========================================================
 
