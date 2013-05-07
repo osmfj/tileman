@@ -45,17 +45,48 @@ local region2 = { -- cannot check because it is too complex
     {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
    }
 
+-- tile to lon/lat
+function num2deg(x, y, zoom)
+    local n = 2 ^ zoom
+    local lon_deg = x / n * 360.0 - 180.0
+    local lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
+    local lat_deg = math.deg(lat_rad)
+    return lon_deg, lat_deg
+end
+
+-- lon/lat to tile
+function deg2num(lon, lat, zoom)
+    local n = 2 ^ zoom
+    local lon_deg = tonumber(lon)
+    local lat_rad = math.rad(lat)
+    local xtile = n * ((lon_deg + 180) / 360)
+    local ytile = n * (1 - (math.log(math.tan(lat_rad) + math.sec(lat_rad)) / math.pi)) / 2
+    return xtile, ytile
+end
+
+-- tile cordinate scale to zoom
+function zoom_num(x, y, z, zoom)
+    if z > zoom then
+        local nx = bit.rshift(x, z-zoom)
+        local ny = bit.rshift(y, z-zoom)
+        return nx, ny
+    elseif z < zoom then
+        local nx = bit.lshift(x, zoom-z)
+        local ny = bit.lshift(y, zoom-z)
+        return nx, ny
+    end
+    return x, y
+end
+
+
 function check_region(region, minmax, x, y, z)
     -- Preliminary check
-    if minmax.minx > x or minmax.maxx < x or minmax.miny > y or minmax.maxy < y then
+    local lon_deg, lat_deg = num2deg(x, y, z)
+    if minmax.minx > lon_deg or minmax.maxx < lon_deg or minmax.miny > lat_deg or minmax.maxy < lat_deg then
         return nil
     end
 
     local target = true
-    local n = 2 ^ z
-    local lon_deg = x / n * 360.0 - 180.0
-    local lat_rad = math.atan(math.sinh(math.pi * (1 - 2 * y / n)))
-    local lat_deg = lat_rad * 180.0 / math.pi
     for k, v in pairs(region) do
         local result = (v.y1 - v.y2) * lon_deg + (v.x2 - v.x1) * lat_deg+ v.x1 * v.y2 - v.x2 * v.y1
         if result > 0 then
@@ -64,6 +95,7 @@ function check_region(region, minmax, x, y, z)
     end
     return target
 end
+
 
 -- FIXME: need to check integlity and existence of external parameters
 -- minz, maxz, allow_jpg, url_rule
