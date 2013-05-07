@@ -163,7 +163,7 @@ tirex_handler = function (premature)
     end
 
     local udpsock = ngx.socket.udp()
-    udpsock:settimeout(300)
+    udpsock:settimeout(1000)
     udpsock:setpeername(tirexsock)
 
     for i = 0, 10000 do
@@ -173,7 +173,7 @@ tirex_handler = function (premature)
             local req = cmds:get(index)
             local ok,err=udpsock:send(req)
             if not ok then
-                ngx.log(ngx.INFO, "Send request error: ", err)
+                ngx.log(ngx.DEBUG, err)
             else
                 cmds:delete(req)
             end
@@ -193,15 +193,15 @@ tirex_handler = function (premature)
             -- send_signal to client context
             local ok, err = stats:incr(resp, 1)
             if not ok then
-                ngx.log(ngx.INFO, "error in incr")
+                ngx.log(ngx.DEBUG, "error in incr")
             end
         else
-            ngx.log(ngx.INFO, "receive error", err)
+            ngx.log(ngx.DEBUG, err)
         end
     end
     udpsock:close()
     -- call myself
-    ngx.timer.at(0, tirex_handler)
+    ngx.timer.at(0.1, tirex_handler)
 end
 -- ========================================================
 
