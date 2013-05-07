@@ -1,7 +1,6 @@
 --
 -- Lua access script for providing osm tile cache
 --
--- requisite: lua-resty-redis, socket
 --
 -- Copyright (C) 2013, Hiroshi Miura
 --
@@ -20,30 +19,31 @@
 --
 local bit = require 'bit'
 
-local region = {
-    {x1=153.890100, y1=26.382110, x2=131.691500, y2=21.209920},
-    {x1=131.691500, y1=21.209920, x2=122.595400, y2=23.519660},
-    {x1=122.595400, y1=23.519660, x2=122.560700, y2=25.841460},
-    {x1=122.560700, y1=25.841460, x2=128.814500, y2=34.748350},
-    {x1=128.814500, y1=34.748350, x2=129.396600, y2=35.094030},
-    {x1=129.396600, y1=35.094030, x2=140.576900, y2=45.706480},
-    {x1=140.576900, y1=45.706480, x2=149.189100, y2=45.802450},
-    {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
+local japan = { -- need split to multiple convex polygon
+   {
+    {lon=153.890100, lat=26.382110},
+    {lon=135.307900, lat=37.547400},
+    {lon=140.576900, lat=45.706480},
+    {lon=149.189100, lat=45.802450},
+    {lon=153.890100, lat=26.382110}
+   },
+   {
+    {lon=132.152900, lat=26.468090},
+    {lon=131.691500, lat=21.209920},
+    {lon=122.595400, lat=23.519660},
+    {lon=122.560700, lat=25.841460},
+    {lon=128.814500, lat=34.748350},
+    {lon=129.396600, lat=35.094030},
+    {lon=132.152900, lat=26.468090}
+   },
+   {
+    {lon=153.890100, lat=26.382110},
+    {lon=132.152900, lat=26.468090},
+    {lon=129.396600, lat=35.094030},
+    {lon=135.307900, lat=37.547400},
+    {lon=153.890100, lat=26.382110}
    }
-local minmax = {minx =122.560700, miny = 21.209920 , maxx= 153.890100 ,maxy=45.802450}
-   
-local region2 = { -- cannot check because it is too complex
-    {x1=153.890100, y1=26.382110, x2=132.152900, y2=26.468090},
-    {x1=132.152900, y1=26.468090, x2=131.691500, y2=21.209920},
-    {x1=131.691500, y1=21.209920, x2=122.595400, y2=23.519660},
-    {x1=122.595400, y1=23.519660, x2=122.560700, y2=25.841460},
-    {x1=122.560700, y1=25.841460, x2=128.814500, y2=34.748350},
-    {x1=128.814500, y1=34.748350, x2=129.396600, y2=35.094030},
-    {x1=129.396600, y1=35.094030, x2=135.307900, y2=37.547400},
-    {x1=135.307900, y1=37.547400, x2=140.576900, y2=45.706480},
-    {x1=140.576900, y1=45.706480, x2=149.189100, y2=45.802450},
-    {x1=149.189100, y1=45.802450, x2=153.890100, y2=26.382110}
-   }
+}
 
 -- tile to lon/lat
 function num2deg(x, y, zoom)
@@ -59,8 +59,8 @@ function deg2num(lon, lat, zoom)
     local n = 2 ^ zoom
     local lon_deg = tonumber(lon)
     local lat_rad = math.rad(lat)
-    local xtile = n * ((lon_deg + 180) / 360)
-    local ytile = n * (1 - (math.log(math.tan(lat_rad) + math.sec(lat_rad)) / math.pi)) / 2
+    local xtile = math.floor(n * ((lon_deg + 180) / 360))
+    local ytile = math.floor(n * (1 - (math.log(math.tan(lat_rad) + (1 / math.cos(lat_rad))) / math.pi)) / 2)
     return xtile, ytile
 end
 
@@ -78,23 +78,32 @@ function zoom_num(x, y, z, zoom)
     return x, y
 end
 
-
-function check_region(region, minmax, x, y, z)
-    -- Preliminary check
-    local lon_deg, lat_deg = num2deg(x, y, z)
-    if minmax.minx > lon_deg or minmax.maxx < lon_deg or minmax.miny > lat_deg or minmax.maxy < lat_deg then
-        return nil
-    end
-
-    local target = true
-    for k, v in pairs(region) do
-        local result = (v.y1 - v.y2) * lon_deg + (v.x2 - v.x1) * lat_deg+ v.x1 * v.y2 - v.x2 * v.y1
-        if result > 0 then
-            target = nil
+function check_region(region, x, y, z)
+    -- check inclusion of polygon
+    local nx, ny = zoom_num(x, y, z, 20)
+    local includes = nil
+    for _, b in pairs(region) do
+        local x1=nil
+        local y1 = nil
+        local tmp_inc = true
+        for _, v in pairs(b) do
+            local x2, y2 = deg2num(v.lon, v.lat, 20)
+            if x1 ~= nil then
+                local res = (y1 - y2) * nx + (x2 - x1) * ny + x1 * y2 - x2 * y1
+                if res < 0 then
+                    tmp_inc = nil
+                end
+            end
+            x1=x2
+            y1=y2
+        end
+        if tmp_inc == true then
+            includes = true
         end
     end
-    return target
+    return includes
 end
+
 
 
 -- FIXME: need to check integlity and existence of external parameters
@@ -149,10 +158,7 @@ if z < 8 then -- low zoom use global site cache
     ngx.exec("@tilecache")
 end
 
-local inside = check_region(region, minmax, x, y, z)
+local inside = check_region(japan, x, y, z)
 if not inside then
-   inside = check_region(region, minmax, x+1, y, z)
-   if not inside then
-       ngx.exec("@tilecache")
-   end
+    ngx.exec("@tilecache")
 end
