@@ -150,6 +150,7 @@ local tirex_sync_duration = 600 -- should be in sec
 -- ========================================================
 --  It does not share context and global vals/funcs
 --
+local tirex_handler
 tirex_handler = function (premature)
     local tirexsock = 'unix:/var/run/tirex/master.sock'
     local tirex_cmd_max_size = 512
