@@ -31,15 +31,8 @@ How to configure custom style
   
 5. Edit style in XML
 
-   TBD
-   
-6. Generate your custom mapnik rules
+ (1) Modify template for local language
 
-  ```
-  ./generate_xml.py --host localhost --port 5432 --user osm --password '' --dbname gis --symbols ./symbols/ --world_boundaries ./world_boundaries/ osm.xml > custom.xml
-  ```
-  
-7. Modify custom template for local language
   Now tweaking the Mapnik rules to render the tiles in a local language. For this all we need to do is point Mapnik to the right font. You can quickly follow the steps briefed by Richard.
 
   You can run
@@ -70,7 +63,7 @@ How to configure custom style
   
   Next, you need to copy the required fonts to the above directory.
 
-  edit the Mapnik custom rule file, as described below.  The file begins with something like this.
+  edit the Mapnik template file: inc/fontset-settings.xml.inc.template, as described below.  The file begins with something like this.
 
   ```
     <FontSet name=”bold-fonts”>
@@ -96,7 +89,19 @@ How to configure custom style
     <Font face_name=”Rachana Regular”></Font>
     </FontSet>
   ```
-  OK, now we copy the file to proper place
+
+ (2)
+
+  TBD
+
+
+6. Generate your custom mapnik rules
+
+  ```
+  ./generate_xml.py --host localhost --port 5432 --user osm --password '' --dbname gis --symbols ./symbols/ --world_boundaries ./world_boundaries/ osm.xml > custom.xml
+  ```
+  
+7. Now we copy the file to proper place
   ```
   cp custom.xml /opt/tileserver/share
   ```
@@ -122,6 +127,6 @@ How to configure custom style
   mapfile=/opt/tileserver/share/custom.xml
   ```
 
-9. restart tirex-backend-master and test!
+9. restart tirex-backend-manager and test!
 
 
