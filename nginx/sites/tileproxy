@@ -3,17 +3,19 @@ server {
   server_name tile;
   root   /var/www;
 
-  #access_log  /var/log/nginx/tileproxy_access.log combined;
-  #error_log   /var/log/nginx/tileproxy_error.log info;
-
   include common_location_params;
-  include tileserver_params;
 
   location / {
-    # check xyz valid
-    access_by_lua_file /etc/nginx/script/tilecheck.lua; 
-
-    # proxy and cache tiles
+    access_by_lua '
+      local osm_tile = require "osm.tile"
+      local minz = 0
+      local maxz = 18
+      local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
+      local ok = osm_tile.check_integrity_xyzm(x, y, z, minz, maxz)
+      if not ok then
+        ngx.exit(ngx.HTTP_FORBIDDEN)
+      end
+    ';
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;
   }
