@@ -13,6 +13,10 @@ server {
 
   include common_location_params;
   include tileserver_params;
+  set $minz = 0;
+  set $proxyz = 8;
+  set $maxz = 18;
+  set $map = 'custom';
 
   location / {
     access_by_lua_file /etc/nginx/script/osmfj_tilecheck_s.lua;

@@ -111,6 +111,7 @@ end
 --
 local minz = tonumber(ngx.var.minz)
 local maxz = tonumber(ngx.var.maxz)
+local proxyz = tonumber(ngx.var.proxyz)
 
 -- only support png tiles
 if ngx.var.uri:sub(-4) ~= ".png" then
@@ -154,7 +155,7 @@ ngx.var.x = ox
 ngx.var.y = oy
 ngx.var.z = oz
 
-if z < 8 then -- low zoom use global site cache 
+if z < proxyz then -- low zoom use global site cache
     ngx.exec("@tilecache")
 end
 
