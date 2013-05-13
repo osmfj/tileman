@@ -1,3 +1,13 @@
+*Release 1.0
+
+ nginx/script/tileserver.lua:
+  - performance improvement in tirex driver
+  - reduce debug message
+ nginx/script/tilecheck.lua:
+  - add detection of region inclusion of x/y/z
+ documents:
+  - update release and readme documents.
+
 *1.0 Beta5 (2013.5.7)
 
  nginx/script/tileserver.lua:
