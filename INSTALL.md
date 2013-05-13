@@ -22,13 +22,13 @@ sudo apt-get install nginx-extras
 1. Install dependencies
 
   ```
-  sudo apt-get install build-essential geoip-database dh-autoreconf lua5.1
+  sudo apt-get install build-essential geoip-database dh-autoreconf lua5.1 libiniparser-dev lua-bitop
   ```
 
-2. Install libraries
+2. Install lua osm libraries
 
   ```
-  sudo apt-get install libiniparser-dev lua-bitop
+  sudo apt-get install lua-nginx-osm
   ```
 
 3. Setup nginx configulation
