@@ -7,12 +7,13 @@ Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
 Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
-- Nginx Web server (tested on nginx v1.4.0 + lua-module 0.8.1)
+- Nginx Web server (tested on nginx v1.4.1 + lua-module 0.8.1)
   we provide PPA for ubuntu user. You need to select nginx-extras package.
+   (need lua module > 0.8.1)
 
 - Tirex, rendering backend 0.4.1
 
-- PostGIS/postgresql 9.1
+- PostGIS 2.0/postgresql 9.1
 
 - osm2pgsql
 
@@ -25,14 +26,17 @@ useful for other platform and who want to run osm tile server.
 Version
 ----
 
-Ver 1.0-beta5
-Release: 7, May, 2013
+Ver 1.0
+Release: 13, May, 2013
 
 
 Install
 ----
-[Setup development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Setup-development-environment-using-Vagrant)
 
+Please see INSTALL.md for up-to-date install instructions.
+
+Also you can try it with Vagrant.
+[Setup development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Setup-development-environment-using-Vagrant)
 
 License
 -- 
@@ -46,6 +50,9 @@ Maintainer
 --
 
 It is maintained by OpenStreetMap Foundation Japan.
+
+Core developer: Hiroshi Miura
+Developers:     Hal Seki
 
 Design
 ==
@@ -62,6 +69,8 @@ We need another script to maintain tile generation control.
 We can get expire.list as "Tile expire method" explaines when importing diff.osm.
 http://wiki.openstreetmap.org/wiki/Tile_expire_methods
 
+Here is a typical configuration 
+![configration diagram](https://dl.dropboxusercontent.com/u/90779460/typical_configuration.png)
 
 planet import
 ---
