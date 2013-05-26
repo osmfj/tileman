@@ -83,46 +83,21 @@ Running environment
 * redis-server パッケージを導入します。(apt-get install redis-server)
 * 必要なdirectoryを掘ります。
 
-Install
-==========
-
-上記実行環境を整えたあと、
-
-    $ git clone git://github.com/osmfj/tilecache.git
-    $ sudo apt-get install lua-nginx-redis
-
-これで、redisにアクセスできる環境ができます。このパッケージはUbuntu raringからしか提供されていないので、同梱されています。
-
-    $ (cd nginx; sudo ./install.sh)
-    
-これで、nginxの設定が導入されます。サーバ名はtileになっている想定です。
-
-    $ cd render_expire
-    $ ./autogen.sh
-    $ ./configure --prefix=/opt/tileserver
-    $ make
-    $ sudo make install
-    $ cd ..
-
-これで、render_expireが/opt/tileserver/bin に導入されます。
-
-
 
 Directories
 =============
 
     /home/tilecache ... tile cache directory for nginx, 要書き込み権限　
-    /opt/tileserver ... application directory
+    /opt/tileman ... application directory
     /opt/osmosis    ... osmosisのバイナリを展開する
-    /opt/tileserver/bin/ lib/ share/  locate application bin/data
-    /var/opt/tileserver ... locate application output, rendered tiles
+    /opt/tileman/bin/ lib/ share/  locate application bin/data
     /var/opt/osmosis ... osmosisの設定や状態　要書き込み権限 osmosisで
 
 
 External Links
 ===============
 
-* [*0] https://github.com/osmfj/tilecache
+* [*0] https://github.com/osmfj/tileman
 * [*1] http://wiki.openstreetmap.org/wiki/Mod_tile
 * [*2] http://wiki.openstreetmap.org/wiki/Tirex
 * [*3] http://wiki.openstreetmap.org/wiki/Mapnik

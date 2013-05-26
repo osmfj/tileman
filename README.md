@@ -1,10 +1,10 @@
-Tileserver recipe for tile.openstreetmap.jp
+TileMan
 =========
 
 Author: Hiroshi Miura, OpenStreetMap Foundation Japan <miurahr@osmf.jp>
 
 
-Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
+Here is a project to maintain tile.openstreetmap.jp tile cache/tile server.
 It uses following technologies.
 
 - Nginx Web server (tested on nginx v1.4.1 + lua-module 0.8.1)
@@ -19,7 +19,7 @@ It uses following technologies.
 
 - osmosis (recommend v0.40 or later)
 
-This recipe is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
+It is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
 useful for other platform and who want to run osm tile server.
 
 
@@ -36,7 +36,7 @@ Install
 Please see INSTALL.md for up-to-date install instructions.
 
 Also you can try it with Vagrant.
-[Setup development environment using Vagrant](https://github.com/osmfj/tilecache/wiki/Setup-development-environment-using-Vagrant)
+[Setup development environment using Vagrant](https://github.com/osmfj/tileman/wiki/Setup-development-environment-using-Vagrant)
 
 License
 -- 

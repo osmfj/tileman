@@ -18,9 +18,9 @@ aptでgit, nginxを入れてください。nginxは1.2.x版が必要です。
 本リポジトリを取得します。
 ---------------------------
 
-    $ git clone git://github.com/osmfj/tilecache.git
+    $ git clone git://github.com/osmfj/tileman.git
 
-tilecache ディレクトリが作成され、その配下にプロジェクトのファイルが配置されます。
+tileman ディレクトリが作成され、その配下にプロジェクトのファイルが配置されます。
 
 nginxの追加設定
 ---------------

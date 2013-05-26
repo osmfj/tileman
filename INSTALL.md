@@ -2,7 +2,7 @@ Setup instruction of tilecache/tileserver
 
 Tested on Ubuntu 12.04 LTS 64bit
 
-# Install Tilecache for using a proxy/cache server of tile.openstreetmap.jp
+# Install TileMan for using a proxy/cache server of tile.openstreetmap.jp
 
 If you only need tile proxy/cache server, just follow this instruction.
 And you can serve original local tile images placed X/Y/Z folder.
@@ -17,7 +17,7 @@ sudo apt-get update
 sudo apt-get install nginx-extras
 ```
 
-## Install tilecache
+## Install TileMan
 
 1. Install dependencies
 
@@ -38,14 +38,10 @@ sudo apt-get install nginx-extras
   sudo ./install.sh
   ```
 
-4. Install render_expire
+4. Install render_expired
 
   ```
-  cd ../render_expire
-  ./autogen.sh
-  ./configure --prefix=/opt/tileserver
-  make
-  sudo make install
+  sudo apt-get install render_expired
   ```
 
 5. Setup nginx configuration
@@ -82,7 +78,7 @@ sudo apt-get install nginx-extras
 
 9. Test
 
-  You can access to the nginx from your local machine. And VirtualHost name of the tilecache server is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
+  You can access to the nginx from your local machine. And VirtualHost name of the tile cache server is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
 
   ```
   local% sudo vi /etc/hosts
@@ -185,9 +181,9 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 2. Importing tools
 
   ```
-  # osm2pgsql, osmoisis, imposm
+  # osm2pgsql, osmoisis
   sudo apt-get install default-java # if not installed
-  sudo apt-get install osm2pgsql osmosis imposm
+  sudo apt-get install osm2pgsql osmosis
   ```
 
 3. OpenStreetMap data setup
