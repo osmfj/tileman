@@ -9,7 +9,7 @@ with OSM planet changes data.
 Options
 ---
 
-It can take additional option.
+osm-updatedb can take additional option.
 
   * '-b': clwan-up out-of-bounding-box ways
  
@@ -22,7 +22,7 @@ It can take additional option.
 Configurations
 ----
 
-You can configure a behavior with /etc/osm-updatedb.conf
+You can configure a behavior with /etc/osmdb.conf
 and a file 'config.txt' in an Osmosis working directory.
 
 Please refer osmosis manual and page how to configure it.
