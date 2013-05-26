@@ -3,30 +3,24 @@ server {
   server_name static;
   root   /var/www;
 
-  #access_log  /var/log/nginx/static_access.log combined;
-  #error_log   /var/log/nginx/static_error.log info;
-
   include common_location_params;
-  include tileserver_params;
 
   location / {
-    # check xyz valid.
-    access_by_lua_file /etc/nginx/script/tilecheck.lua;
-
-    ## if you want to check GeoIP, use bellow instead of above.
-    ## and you may want to edit nginx/conf.d/geoip.conf
-    #access_by_lua_file /etc/nginx/script/stilecheck.lua;
-
-    # if static tile exist return it.
-    # if not, goto @tilecache
-    #
+    access_by_lua '
+      local osm_tile = require "osm.tile"
+      local minz = 0
+      local maxz = 18
+      local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
+      local ok = osm_tile.check_integrity_xyzm(x, y, z, minz, maxz)
+      if not ok then
+        ngx.exit(ngx.HTTP_FORBIDDEN)
+      end
+    ';
     root /var/opt/tileserver/static;
     try_files $uri $uri/ @tilecache;
   }
 
   location @tilecache {
-    # try to ask backend (tile.openstreetmap.org) to provide tiles
-    # and return it. also cache it.
     include tileproxy_params;
     proxy_pass http://openstreetmap_backend;
   }
