@@ -1,4 +1,4 @@
-Setup instruction of tilecache/tileserver
+Setup instruction of tileman
 
 Tested on Ubuntu 12.04 LTS 64bit
 
@@ -8,6 +8,17 @@ If you only need tile proxy/cache server, just follow this instruction.
 And you can serve original local tile images placed X/Y/Z folder.
 
 The OpenStreetMap Japan team provide Ubuntu PPA for it.
+
+## clone git repository.
+
+We use submodule feature of git.
+Please follows an instructon bellow.
+
+```
+git clone git://github.com/osmfj/tileman.git
+git submodule init
+git submodule update
+```
 
 ## Install nginx
 
