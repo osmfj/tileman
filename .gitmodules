@@ -1,3 +1,6 @@
 [submodule "render-expired"]
 	path = render-expired
 	url = git://github.com/miurahr/render-expired.git
+[submodule "lib/iniparser"]
+	path = lib/iniparser
+	url = git://github.com/miurahr/iniparser.git

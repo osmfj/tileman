@@ -24,5 +24,5 @@ if [ "$ans" = "y" -o "$ans" = "Y" ]; then
      make LUA=lua5.1&& \
      sudo make LUA=lua5.1 install)
   echo "Build iniparser lib..."
-  (cd iniparser3.0b; make && make install )
+  (cd iniparser; make && make install )
 fi
