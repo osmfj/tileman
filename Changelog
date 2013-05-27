@@ -1,4 +1,24 @@
-*Release 1.0
+*v1.2 - development
+
+ lib/lua-nginx-osm
+   package as library of core logics 
+
+*v1.1 (2013.5.26)
+ 
+ Rename project as 'TileMan'
+ 
+ doc/
+   -change project name in documents
+   -add configuration diagram
+ updatedb/:
+   -organize directory structure.
+    and introduce bin/ etc/
+ lib/iniparser:
+   -now it is submodule
+ render-expired/:
+   -now it is submodule
+ 
+*v1.0 (2013.5.13)
 
  nginx/script/tileserver.lua:
   - performance improvement in tirex driver
