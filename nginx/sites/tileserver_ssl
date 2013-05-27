@@ -26,8 +26,10 @@ server {
       local osm_tile = require "osm.tile"
       local tirex = require "osm.tirex"
       local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
-      -- try renderd file.
-      local png, err = osm_tile.get_tile(map, x, y, z)
+      -- try rendered file.
+      local tilefile = osm_tile.xyz_to_metatile_filename(x, y, z)
+      local tilepath = "/var/lib/tirex/tiles/custom/"..tilefile
+      local png, err = osm_tile.get_tile(tilepath, x, y, z)
       if png then
         ngx.header.content_type = "image/png"
         ngx.print(png)
@@ -38,8 +40,6 @@ server {
       if not ok then
          return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
       end
-      local tilefile = osm_tile.xyz_to_metatile_filename(x, y, z)
-      local tilepath = "/var/lib/tirex/tiles/custom/"..tilefile
       local png, err = osm_tile.get_tile(tilepath, x, y, z)
       if png then
         ngx.header.content_type = "image/png"
