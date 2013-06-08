@@ -1,7 +1,14 @@
 *v1.2 - development
 
  lib/lua-nginx-osm
-   package as library of core logics 
+   move core logics as library
+   move to git submodule
+ utils/render-expired
+ utils/updatedb
+   reorganize utilities in utils directory
+ nginx/sites/tileserver{_ssl}
+   fix undefind var map reference.
+
 
 *v1.1 (2013.5.26)
  

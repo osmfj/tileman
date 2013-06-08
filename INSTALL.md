@@ -20,7 +20,7 @@ git submodule init
 git submodule update
 ```
 
-## Install nginx
+## Install nginx from PPA
 
 ```
 sudo apt-add-repository ppa:osmjapan/ppa
@@ -30,34 +30,17 @@ sudo apt-get install nginx-extras
 
 ## Install TileMan
 
-1. Install dependencies
+1. Install dependencies and core libraries from Ubuntu repository and PPA
 
   ```
-  sudo apt-get install build-essential geoip-database dh-autoreconf lua5.1 libiniparser-dev lua-bitop
+  sudo apt-get install lua-nginx-osm geoip-database libiniparser lua-bitop render_expired
   ```
 
-2. Install lua osm libraries
-
-  ```
-  sudo apt-get install lua-nginx-osm
-  ```
-
-3. Setup nginx configulation
+2. Setup nginx configulation from TileMan
 
   ```
   cd ../nginx
   sudo ./install.sh
-  ```
-
-4. Install render_expired
-
-  ```
-  sudo apt-get install render_expired
-  ```
-
-5. Setup nginx configuration
-
-  ```
   sudo ln -s /etc/nginx/sites-available/tileproxy /etc/nginx/sites-enabled/tileproxy
   ```
 
@@ -74,20 +57,20 @@ sudo apt-get install nginx-extras
   sudo ln -s /etc/nginx/sites-available/statictile /etc/nginx/sites-enabled/statictile
   ```
 
-7. Create cache folder
+3. Create cache folder
 
   ```
   sudo mkdir /home/tilecache
   sudo chmod 777 /home/tilecache
   ```
 
-8. Restart nginx
+4. Restart nginx
 
   ```
   sudo service nginx restart
   ```
 
-9. Test
+5. Test
 
   You can access to the nginx from your local machine. And VirtualHost name of the tile cache server is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
 
