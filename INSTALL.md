@@ -282,11 +282,19 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   
 7. configure import tool setting
 
+  You should change at least, MEMSIZE, PROCESS_NUM, REGION, COUNTRY.
+  please refer definitions 
+  http://www.geofabrik.de/
+
   ```
   vi /etc/osmdb.conf
+ 
   DBNAME=gis
   DBUSER=osm
   DBPASS=
+  
+  MEMSIZE=1024
+  PROCESS_NUM=1
   
   ORIGIN=geofabrik
   #ORIGIN=planet
