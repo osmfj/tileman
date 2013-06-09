@@ -336,6 +336,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 9. mapnik openstreetmap style and more
 
   ```
+  sudo apt-get install python-mapnik
   git clone git@github.com:osmfj/mapnik-stylesheets.git
     or
   git clone https://github.com/osmfj/mapnik-stylesheets.git
@@ -348,6 +349,21 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   ./get-coastlines.sh
   ```
   
+11. setup xml config
+  ```
+  ./generate_xml.py --dbname gis --user osm --accept-none
+  ./generate_xml.py osm.xml custom.xml --dbname gis --user osm  --accept-none
+  ```
+
+12. setup tirex
+  ```
+  cp tileman/osmfj/tirex/render/mapnik.conf /etc/tirex/render/mapnik.conf
+  # diff is font path
+  cp tileman/osmfj/tirex/render/mapnik/custum.conf /etc/tirex/render/mapnik/
+  vi /etc/tirex/render/mapnik/custom.conf 
+  # edit stylesheet path and name
+  ```
+
   Further instruction is in doc/custom_style.md
   It shows a practical environment with PostGIS/Mapnik/Tirex combination.
 
