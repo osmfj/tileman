@@ -263,13 +263,28 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   sudo apt-get install render-expired
   ```
   
-5. Configure postgresql user for mapnik configuration
+5. Configure postgresql user
 
  Edit /opt/postgresql/9.1/main/pg_hba.conf
  Make test easy, add followings:
  ```
   # TYPE  DATABASE  ADDRESS   USER  METHOD
-    local   gis      osm             trust
+    local   gis               osm    trust
+  ```
+
+6. Configure postgis, role and hstore
+
+  ```
+  sudo -u postgres -i
+  createuser osm
+  createdb -E UTF8 -O osm gis
+  createlang plpgsql gis
+  psql -d gis -f /usr/share/postgresql/9.1/contrib/postgis-2.0/postgis.sql 
+  psql -d gis -f /usr/share/postgresql/9.1/contrib/postgis-2.0/spatial_ref_sys.sql
+  psql -d gis 'ALTER TABLE geography_columns owner to osm;'
+  psql -d gis 'ALTER TABLE geometry_columns  owner to osm;'
+  psql -d gis 'ALTER TABLE spatial_ref_sys   owner to osm;'
+  exit
   ```
 
 6. install import tool
