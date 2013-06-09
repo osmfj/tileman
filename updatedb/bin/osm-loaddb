@@ -3,7 +3,7 @@
 NAME=osm-loaddb
 CONF=osmdb.conf
 # Read configuration variable file if it is present
-[ -r "/etc/${CONF}" ] && . "/etc/${CONF}.conf"
+[ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
 WORKDIR_OSM=${WORKDIR_OSM:=/var/opt/osmosis}
 DBUSER=${DBUSER:=osm}
@@ -28,14 +28,16 @@ if [ ! "$DBPASS" = "" ] ; then
 OPTIONS+=" -p $DBPASS "
 fi
 
-if [ "$ORIGIN" = "geofabrik"] ; then
+if [ "$ORIGIN" = "planet" ]; then
+  wget http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
+  cp state.txt $WORKDIR_OSM/
+  wget http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+  /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+elif [ "$ORIGIN" = "geofabrik" ]; then
   wget http://download.geofabrik.de/$REGION/$COUNTRY-updates/state.txt
   cp state.txt $WORKDIR_OSM/
   wget http://download.geofabrik.de/$REGION/$COUNTRY-latest.osm.pbf
   /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
 else
-  wget http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
-  cp state.txt $WORKDIR_OSM/
-  wget http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
-  /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+  echo Unknown origin $ORIGIN
 fi
