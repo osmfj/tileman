@@ -141,10 +141,10 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 1. Mapnik rendering library
 
   ```
+  sudo apt-get install python-software-properties
   sudo apt-add-repository ppa:osmjapan/ppa # if you did not add this yet
   sudo apt-get update
-  sudo apt-get install python-software-properties
-  sudo apt-get install libmapnik-dev
+  sudo apt-get install libmapnik-dev unzip
   ```
 
 2. Tirex rendering engine
@@ -333,7 +333,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
    /opt/tileman/bin/osm-loaddb 
    ```
    
-8. mapnik openstreetmap style and more
+9. mapnik openstreetmap style and more
 
   ```
   git clone git@github.com:osmfj/mapnik-stylesheets.git
@@ -341,6 +341,13 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   git clone https://github.com/osmfj/mapnik-stylesheets.git
   ```
 
+10. get coastlines
+
+  ```
+  cd mapnik-stylesheets
+  ./get-coastlines.sh
+  ```
+  
   Further instruction is in doc/custom_style.md
   It shows a practical environment with PostGIS/Mapnik/Tirex combination.
 
