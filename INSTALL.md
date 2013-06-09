@@ -9,42 +9,77 @@ And you can serve original local tile images placed X/Y/Z folder.
 
 The OpenStreetMap Japan team provide Ubuntu PPA for it.
 
+
+## Install dependency programs
+
+We use git version control system and Private Package Archive.
+
+  ```
+  sudo apt-get install git python-software-properties
+  ```
+
 ## clone git repository.
 
 We use submodule feature of git.
 Please follows an instructon bellow.
 
-```
-git clone git://github.com/osmfj/tileman.git
-git submodule init
-git submodule update
-```
+  ```
+  git clone https://github.com/osmfj/tileman.git
+  git submodule init
+  git submodule update
+  ```
+
+  If you have github account, you can use a following instead;
+
+  ```
+  git://github.com/osmfj/tileman.git
+  ```
+
+If you are not developer, it is recommended to download tar.gz or zip archive
+from https://github.com/osmfj/tileman/tags
 
 ## Install nginx from PPA
 
-```
-sudo apt-add-repository ppa:osmjapan/ppa
-sudo apt-get update
-sudo apt-get install nginx-extras
-```
+  ```
+  sudo apt-add-repository ppa:osmjapan/ppa
+  sudo apt-get update
+  sudo apt-get install nginx-extras
+  ```
 
 ## Install TileMan
 
 1. Install dependencies and core libraries from Ubuntu repository and PPA
 
   ```
-  sudo apt-get install lua-nginx-osm geoip-database libiniparser lua-bitop render_expired
+  sudo apt-get install geoip-database lua5.1 libiniparser lua-bitop
+  ```
+  
+  if you intend to be a developer, you may need following packages.
+  ```
+    sudo apt-get install build-essentials geoip-database dh-autoreconf lua5.1 libiniparser-dev lua-bitop
   ```
 
-2. Setup nginx configulation from TileMan
+ It will be also installed so many depencent packages.
+ 
+2. Install lua osm library
 
   ```
-  cd ../nginx
+  sudo apt-get install lua-nginx-osm
+  ```
+
+3. Setup nginx configulation
+
+  ```
+  cd  tileman/nginx
   sudo ./install.sh
+  ```
+
+  If you want to use TileProxy;
+  ```
   sudo ln -s /etc/nginx/sites-available/tileproxy /etc/nginx/sites-enabled/tileproxy
   ```
 
-  If you need SSL settings, enable ssl configuration
+  If you need SSL settings, enable ssl configuration;
 
   ```
   sudo ln -s /etc/nginx/sites-available/tileproxy-ssl /etc/nginx/sites-enabled/tileproxy-ssl
@@ -57,20 +92,21 @@ sudo apt-get install nginx-extras
   sudo ln -s /etc/nginx/sites-available/statictile /etc/nginx/sites-enabled/statictile
   ```
 
-3. Create cache folder
+
+4. Create cache folder
 
   ```
   sudo mkdir /home/tilecache
   sudo chmod 777 /home/tilecache
   ```
 
-4. Restart nginx
+5. Restart nginx
 
   ```
   sudo service nginx restart
   ```
 
-5. Test
+6. Test
 
   You can access to the nginx from your local machine. And VirtualHost name of the tile cache server is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
 
@@ -115,10 +151,10 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 
   ```
   sudo apt-get install tirex-core tirex-backend-mapnik \
-       tirex-backend-wms tirex-example-map tirex-munin-plugin \
-       tirex-nagios-plugin tirex-syncd
+       tirex-example-map
   ```
 
+  
 ## example-map rendering server
 
 1. Setup nginx configuration
@@ -175,18 +211,36 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 2. Importing tools
 
   ```
-  # osm2pgsql, osmoisis
-  sudo apt-get install default-java # if not installed
-  sudo apt-get install osm2pgsql osmosis
+  # osm2pgsql
+  sudo apt-get install osm2pgsql
+  #  osmoisis
+  sudo apt-get install openjdk-7-jre # if not installed  
+  wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.tgz
+  mkdir -p /opt/osmosis
+  cd /opt/osmosis
+  sudo tar zxf ~/osmosis-latest.tgz
+  sudo mkdir -p /var/opt/osmosis
   ```
 
 3. OpenStreetMap data setup
 
   ```
-  sudo apt-get install openstreetmap-postgis-db-setup openstreetmap-mapnik-data
+  sudo apt-get install openstreetmap-postgis-db-setup
   ```
 
-4. mapnik openstreetmap style and more
+4. Install render-expired
+
+  ```
+  sudo apt-get install render-expired
+  ```
+  
+5. mapnik openstreetmap style and more
+
+  ```
+  git clone git@github.com:osmfj/mapnik-stylesheets.git
+    or
+  git clone https://github.com/osmfj/mapnik-stylesheets.git
+  ```
 
   Further instruction is in doc/custom_style.md
   It shows a practical environment with PostGIS/Mapnik/Tirex combination.
