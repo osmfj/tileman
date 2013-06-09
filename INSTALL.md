@@ -220,13 +220,42 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   cd /opt/osmosis
   sudo tar zxf ~/osmosis-latest.tgz
   sudo mkdir -p /var/opt/osmosis
+  sudo chown peter /var/opt/osmosis
   ```
+  
+  please change owner of /var/opt/osmosis to who run update-db script.
 
 3. OpenStreetMap data setup
 
+  Create db named 'gis'
+  
   ```
   sudo apt-get install openstreetmap-postgis-db-setup
   ```
+  You will be asked by package configuration.
+  ```
+  Configuring openstreetmap-postgis-db-setup
+   "If you don't use the default name, you might need to adapt programs and scripts to use the new name
+   Name of the database to create:"
+      gis
+   ok
+   ```
+   
+   adding users who want to use osm data.
+   please add you and 'osm'
+   ```  
+   ────┤   Configuring openstreetmap-postgis-db-setup ├───┐
+   │ Please specify which users should have access to     |
+   | the newly created db. You will want the user www-data| 
+   | for rendering and your own user name to import data  |
+   | into the db.                                         │
+   │ The list of users is blank separated:                |
+   | E.g. "www-data peter"                                |
+   |                                                      │  
+   │ Other users that should have access to the db:       |
+     ──────────────────────────────────────────────────── 
+     www-data peter osm                                 
+   ```
 
 4. Install render-expired
 
@@ -234,7 +263,54 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   sudo apt-get install render-expired
   ```
   
-5. mapnik openstreetmap style and more
+5. Configure postgresql user for mapnik configuration
+
+ Edit /opt/postgresql/9.1/main/pg_hba.conf
+ Make test easy, add followings:
+ ```
+  # TYPE  DATABASE  ADDRESS   USER  METHOD
+    local   gis      osm             trust
+  ```
+
+6. install import tool
+
+  ```
+  cd tileman/updatedb
+  chmod +x install.sh
+  sudo ./install.sh
+  ```
+  
+7. configure import tool setting
+
+  ```
+  vi /etc/osmdb.conf
+  DBNAME=gis
+  DBUSER=osm
+  DBPASS=
+  
+  ORIGIN=geofabrik
+  #ORIGIN=planet
+
+  # import region and country that need when origin is geofabrik
+  REGION=asia
+  COUNTRY=japan
+  ```
+  
+  if you want to import world data, please change ORIGIN.
+  You need to change also /var/opt/osmosis/configration.txt
+  
+  further detail is in tileman/updatedb/osmosis_conf/
+  
+8. import planet or geofabrik data
+
+   ```
+   cd $HOME
+   mkdir tmp
+   cd tmp
+   /opt/tileman/bin/osm-loaddb 
+   ```
+   
+8. mapnik openstreetmap style and more
 
   ```
   git clone git@github.com:osmfj/mapnik-stylesheets.git
