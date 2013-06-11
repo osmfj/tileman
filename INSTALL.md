@@ -356,13 +356,17 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   ```
 
 12. setup tirex
+
+  you can see recommend modifications in
   ```
-  cp tileman/osmfj/tirex/render/mapnik.conf /etc/tirex/render/mapnik.conf
-  # diff is font path
-  cp tileman/osmfj/tirex/render/mapnik/custum.conf /etc/tirex/render/mapnik/
-  vi /etc/tirex/render/mapnik/custom.conf 
-  # edit stylesheet path and name
+  doc/tirex_mapnik_conf.diff
+  doc/tirex_mapnik_custom.conf
   ```
+
+   ```
+  sudo vi /etc/tirex/render/mapnik.conf
+  sudo vi /etc/tirex/render/mapnik/custom.conf
+   ```
 
   Further instruction is in doc/custom_style.md
   It shows a practical environment with PostGIS/Mapnik/Tirex combination.
