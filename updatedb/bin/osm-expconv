@@ -1,0 +1,45 @@
+#!/usr/bin/env lua
+
+require "io"
+require "string"
+local tile = require "osm.tile"
+
+if arg[1] == "-h" then
+    print("osm-expconv - convert expire.list to tirex form")
+    print(" ")
+    print("  osm-expconv [-h] MAPNAME MAXZOOM ")
+    os.exit(0)
+end
+
+if not arg[2] then
+    print("Too few arguments")
+    os.exit(1)
+end
+
+local maxz = arg[2]
+local map  = arg[1]
+
+-- get argument
+--for a in ... do
+--
+--end
+
+-- main
+local captures = "(%d+)/(%d+)/(%d+)"
+for line in io.stdin:lines() do
+    local s,_,sz,sx,sy = string.find(line, captures)
+    if not s then
+        break
+    end
+    local x = tonumber(sx)
+    local y = tonumber(sy)
+    local z = tonumber(sz)
+    if tile.check_integrity_xyz(x, y, z) then
+        io.stdout:write(string.format("map=%s x=%d y=%d z=%d\n", map, x, y, z))
+        for i = 1, maxz - z do
+            nx, ny = tile.zoom_num(x, y, z, z + i)
+            io.stdout:write(string.format("map=%s x=%d-%d y=%d-%d z=%d\n", map, nx, nx+i*2-1, ny, ny+i*2-1, z+i))
+        end
+    end
+end
+
