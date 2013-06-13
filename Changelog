@@ -8,6 +8,8 @@ nginx/sites/tileserver{_ssl}
 updatedb
  -handle expire.list by tirex-batch
  -no neccesary render-expired anymore
+updatedb/bin/osm-expconv:
+ - convert expire.list to tirex-batch command
 
 
 *v1.1 (2013.5.26)
