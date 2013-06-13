@@ -1,13 +1,15 @@
 *v1.2 - development
 
- lib/lua-nginx-osm
-   move core logics as library
-   move to git submodule
- utils/render-expired
- utils/updatedb
-   reorganize utilities in utils directory
- nginx/sites/tileserver{_ssl}
-   fix undefind var map reference.
+lib/lua-nginx-osm
+ -move core logics as library
+ -move to git submodule
+nginx/sites/tileserver{_ssl}
+ -fix undefind var map reference.
+updatedb
+ -handle expire.list by tirex-batch
+ -no neccesary render-expired anymore
+updatedb/bin/osm-expconv:
+ - convert expire.list to tirex-batch command
 
 
 *v1.1 (2013.5.26)

@@ -10,6 +10,7 @@ sudo mkdir -p ${OSMOSIS_WORK}
 
 sudo install -c bin/osm-updatedb ${DESTDIR}
 sudo install -c bin/osm-loaddb ${DESTDIR}
+sudo install -c bin/osm-expconv ${DESTDIR}
 sudo install -c etc/osmdb.conf ${CONFDIR}
 
 sudo cp osmosis_conf/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
