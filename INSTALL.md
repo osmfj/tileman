@@ -51,12 +51,12 @@ from https://github.com/osmfj/tileman/tags
 1. Install dependencies and core libraries from Ubuntu repository and PPA
 
   ```
-  sudo apt-get install geoip-database lua5.1 libiniparser lua-bitop
+  sudo apt-get install geoip-database lua5.1 lua-bitop
   ```
   
   if you intend to be a developer, you may need following packages.
   ```
-    sudo apt-get install build-essentials geoip-database dh-autoreconf lua5.1 libiniparser-dev lua-bitop
+    sudo apt-get install build-essentials geoip-database dh-autoreconf lua5.1 lua-bitop
   ```
 
  It will be also installed so many depencent packages.
@@ -257,13 +257,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
      www-data peter osm                                 
    ```
 
-4. Install render-expired
-
-  ```
-  sudo apt-get install render-expired
-  ```
-  
-5. Configure postgresql user
+4. Configure postgresql user
 
  Edit /opt/postgresql/9.1/main/pg_hba.conf
  Make test easy, add followings:
@@ -272,7 +266,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
     local   gis               osm    trust
   ```
 
-6. Configure postgis, role and hstore
+5. Configure postgis, role and hstore
 
   ```
   sudo -u postgres -i

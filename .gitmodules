@@ -1,9 +1,3 @@
-[submodule "render-expired"]
-	path = render-expired
-	url = git://github.com/miurahr/render-expired.git
-[submodule "lib/iniparser"]
-	path = lib/iniparser
-	url = git://github.com/miurahr/iniparser.git
-[submodule "lib/lua-nginx-osm"]
-	path = lib/lua-nginx-osm
-	url = git://github.com/miurahr/lua-nginx-osm.git
+[submodule "lua-nginx-osm"]
+	path = lua-nginx-osm
+	url = https://github.com/miurahr/lua-nginx-osm.git
