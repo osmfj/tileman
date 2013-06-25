@@ -7,7 +7,7 @@ local tile = require "osm.tile"
 if arg[1] == "-h" then
     print("osm-expconv - convert expire.list to tirex form")
     print(" ")
-    print("  osm-expconv [-h] MAPNAME MAXZOOM ")
+    print("  osm-expconv [-h] MAPNAME MINZOOM MAXZOOM ")
     os.exit(0)
 end
 
@@ -16,7 +16,8 @@ if not arg[2] then
     os.exit(1)
 end
 
-local maxz = arg[2]
+local maxz = arg[3]
+local minz = arg[2]
 local map  = arg[1]
 
 -- get argument
@@ -26,6 +27,7 @@ local map  = arg[1]
 
 -- main
 local captures = "(%d+)/(%d+)/(%d+)"
+local res = {}
 for line in io.stdin:lines() do
     local s,_,sz,sx,sy = string.find(line, captures)
     if not s then
@@ -37,9 +39,17 @@ for line in io.stdin:lines() do
     if tile.check_integrity_xyz(x, y, z) then
         io.stdout:write(string.format("map=%s x=%d y=%d z=%d\n", map, x, y, z))
         for i = 1, maxz - z do
-            nx, ny = tile.zoom_num(x, y, z, z + i)
+            local nx, ny = tile.zoom_num(x, y, z, z + i)
             io.stdout:write(string.format("map=%s x=%d-%d y=%d-%d z=%d\n", map, nx, nx+i*2-1, ny, ny+i*2-1, z+i))
         end
+        for i = 1, z - minz do
+            local nx, ny = tile.zoom_num(x, y, z, z -i)
+            local index = string.format("%d:%d:%d", z-i, nx, ny)
+            res[index] = string.format("map=%s x=%d y=%d z=%d\n", map, nx, ny, z-i)
+        end
     end
+end
+for k, v in pairs(res) do
+    io.stdout:write(v)
 end
 
