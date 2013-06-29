@@ -49,6 +49,7 @@ server {
       -- required module
       local osm_tile = require "osm.tile"
       local tirex = require "osm.tirex"
+      local math = require "math"
       local map = "custom"
       local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
       -- try renderd file.
@@ -61,7 +62,9 @@ server {
         return ngx.OK
       end
       -- ask tirex to render it
-      local ok = tirex.send_request(map, x, y, z)
+      local priority = 1
+      local maxz = math.min(18, z + 2)
+      local ok = tirex.request(map, x, y, z, maxz, priority)
       if not ok then
          return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
       end

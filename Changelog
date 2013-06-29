@@ -1,10 +1,12 @@
-*v1.2 - development
+*v1.2 (2013.6.29)
 
 lib/lua-nginx-osm
  -move core logics as library
  -move to git submodule
+ -update to support background request
 nginx/sites/tileserver{_ssl}
  -fix undefind var map reference.
+ -use new request api
 updatedb
  -handle expire.list by tirex-batch
  -no neccesary render-expired anymore
