@@ -6,7 +6,7 @@
 server {
   listen 80;
   server_name j.tile.openstreetmap.jp tile.openstreetmap.jp;
-  root   /var/www;
+  root   /opt/tileman/html;
 
   access_log  /var/log/nginx/tileserver_access.log combined;
   error_log   /var/log/nginx/tileserver_error.log info;
@@ -27,7 +27,7 @@ server {
         ngx.exec("@tileserver")
       end
     ';
-    root /var/opt/tileserver/static;
+    root /opt/tileman/tiles;
     try_files $uri $uri/ @tileserver;
   }
 
