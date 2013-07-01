@@ -1,0 +1,23 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@ 
+
+override_dh_auto_install:
+	install -d $(CURDIR)/debian/tileman/usr/bin/
+	install -d $(CURDIR)/debian/tileman/etc/nginx/conf.d
+	install -d $(CURDIR)/debian/tileman/etc/nginx/sites-available
+	#
+	install -t $(CURDIR)/debian/tileman/usr/bin/ updatedb/bin/*
+	install -t $(CURDIR)/debian/tileman/etc/     updatedb/etc/osmdb.conf
+	#
+	install -t $(CURDIR)/debian/tileman/etc/nginx/conf.d          nginx/conf.d/*
+	install -t $(CURDIR)/debian/tileman/etc/nginx/sites-available nginx/sites/*
+	install -t $(CURDIR)/debian/tileman/etc/nginx/                nginx/*_params
+	#
+	install -d $(CURDIR)/debian/tileman/usr/share/tileman/
+	install -t $(CURDIR)/debian/tileman/usr/share/tileman/ data/Liancourt_Rocks_lang_ja_tiles.tar.bz2
