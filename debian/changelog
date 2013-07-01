@@ -1,3 +1,10 @@
+tileman (1.2-2) precise; urgency=low
+
+  * Change architecture to all.
+    because binaries are shells and lua script.
+
+ -- Hiroshi Miura <miurahr@linux.com>  Tue, 02 Jul 2013 08:16:42 +0900
+
 tileman (1.2-1) precise; urgency=low
 
   * Initial release.

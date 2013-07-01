@@ -9,7 +9,7 @@ Homepage: https://osmfj.github.io/tileman/
 #Vcs-Browser: http://git.debian.org/?p=collab-maint/tileman.git;a=summary
 
 Package: tileman
-Architecture: any
+Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends}, nginx-extras (>=1.4.1),
          lua-nginx-osm, tirex-core
 Suggests: osmosis
