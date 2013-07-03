@@ -15,7 +15,7 @@
 # ----------------------------
 #
 NAME=tileman-load
-CONF=osmdb.conf
+CONF=tileman.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
