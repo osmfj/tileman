@@ -1,6 +1,20 @@
-#!/bin/sh
+#!/bin/bash
 #
-NAME=osm-loaddb
+# tileman-load
+#
+# Get osm planet and load into PostGIS database
+# osmosis configuration should be in $WORKER_DIR
+#
+# Licensed in GPLv3
+# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+#
+# ----------------------------
+# ChnageLog
+#
+# 2013-07-02 change command name to tileman-load
+# ----------------------------
+#
+NAME=tileman-load
 CONF=osmdb.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"

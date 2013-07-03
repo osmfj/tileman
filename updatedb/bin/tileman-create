@@ -1,4 +1,19 @@
-#!/bin/sh
+#!/bin/bash
+#
+# tileman-create
+#
+# create PostGIS database for osm data
+# osmosis configuration should be in $WORKER_DIR
+#
+# Licensed in GPLv3
+# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+#
+# ----------------------------
+# ChnageLog
+#
+# 2013-07-02 change command name to tileman-create
+# ----------------------------
+#
 
 echo "Do you run it on postgres user?[N/y]"
 read ans

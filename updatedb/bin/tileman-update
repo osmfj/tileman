@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# osm-updatedb
+# tileman-update
 #
 # Get osm changes and update PostGIS database
 # osmosis configuration should be in $WORKER_DIR
@@ -11,9 +11,10 @@
 # ----------------------------
 # ChnageLog
 #
+# 2013-07-02 change command name to tileman-update
 # ----------------------------
 #
-NAME=osm-updatedb
+NAME=tileman-update
 CONF=osmdb.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
@@ -115,8 +116,8 @@ mkfifo $OSC_PIPE
 if [ "${TILE_UPDATE_FLAG}" = "yes" ]; then
   $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
   $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE 
-  cat $EXPIRE_FILE | osm-expconv $MAPNAME $MAXZOOM | $TIREX_BATCH_BIN -f $FILTER -p 10 &
-  cat $EXPIRE_FILE | osm-expconv $MAPNAME $EXPIRE_ZOOM $MINZOOM | $TIREX_BATCH_BIN -f $FILTER -p 15 &
+  cat $EXPIRE_FILE | tileman-expconv $MAPNAME $MAXZOOM | $TIREX_BATCH_BIN -f $FILTER -p 10 &
+  cat $EXPIRE_FILE | tileman-expconv $MAPNAME $EXPIRE_ZOOM $MINZOOM | $TIREX_BATCH_BIN -f $FILTER -p 15 &
 else
   $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE &
   $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
