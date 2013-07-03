@@ -67,10 +67,10 @@ from https://github.com/osmfj/tileman/tags
   sudo apt-get install lua-nginx-osm
   ```
 
-3. Setup nginx configulation
+3. Setup nginx configulation, cache directory and updatedb utilities, 
 
   ```
-  cd  tileman/nginx
+  cd  tileman
   sudo ./install.sh
   ```
 
@@ -92,21 +92,13 @@ from https://github.com/osmfj/tileman/tags
   sudo ln -s /etc/nginx/sites-available/statictile /etc/nginx/sites-enabled/statictile
   ```
 
-
-4. Create cache folder
-
-  ```
-  sudo mkdir /home/tilecache
-  sudo chmod 777 /home/tilecache
-  ```
-
-5. Restart nginx
+4. Restart nginx
 
   ```
   sudo service nginx restart
   ```
 
-6. Test
+5. Test
 
   You can access to the nginx from your local machine. And VirtualHost name of the tile cache server is named 'tile' as default. So you have to add 'tile' entry on your local hosts file (not on the remote host).
 
@@ -140,12 +132,15 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 
 1. Mapnik rendering library
 
+ PPA now has Mapnik 2.2.0
+
   ```
   sudo apt-get install python-software-properties
   sudo apt-add-repository ppa:osmjapan/ppa # if you did not add this yet
   sudo apt-get update
   sudo apt-get install libmapnik-dev unzip
   ```
+
 
 2. Tirex rendering engine
 
@@ -268,6 +263,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
 
 5. Configure postgis, role and hstore
 
+ You can see /opt/tileman/bin/createdb.sh 
   ```
   sudo -u postgres -i
   createuser osm
@@ -280,16 +276,8 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   psql -d gis 'ALTER TABLE spatial_ref_sys   owner to osm;'
   exit
   ```
-
-6. install import tool
-
-  ```
-  cd tileman/updatedb
-  chmod +x install.sh
-  sudo ./install.sh
-  ```
   
-7. configure import tool setting
+6. configure import tool setting
 
   You should change at least, MEMSIZE, PROCESS_NUM, REGION, COUNTRY.
   please refer definitions 
