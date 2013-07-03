@@ -1,9 +1,10 @@
-*v1.2 (2013.6.29)
+*v1.2 (2013.7.4)
 
-lib/lua-nginx-osm
+lua-nginx-osm
  -move core logics as library
  -move to git submodule
  -update to support background request
+ -based on lua-nginx-osm v0.30
 nginx/sites/tileserver{_ssl}
  -fix undefind var map reference.
  -use new request api
@@ -12,7 +13,13 @@ updatedb
  -no neccesary render-expired anymore
 updatedb/bin/osm-expconv:
  - convert expire.list to tirex-batch command
-
+ - tile expiration is done by tirex-batch now
+install.sh:
+ - consolidated install script
+ - move directory structure under /opt/tileman/
+others:
+ - remove lib/iniparser render-expired
+   there are not nessesary now.
 
 *v1.1 (2013.5.26)
  
