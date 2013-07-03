@@ -1,4 +1,4 @@
-*v1.2 (2013.7.1)
+*v1.2 (2013.7.4)
 
 lua-nginx-osm
  -move core logics as library
