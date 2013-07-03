@@ -52,10 +52,7 @@ fi
 
 # install updatedb utils
 echo "Install osm/postgis utilities..."
-install -c updatedb/bin/osm-updatedb ${DESTDIR}
-install -c updatedb/bin/osm-loaddb ${DESTDIR}
-install -c updatedb/bin/osm-expconv ${DESTDIR}
-install -c updatedb/bin/createdb.sh ${DESTDIR}
+install -c updatedb/bin/* ${DESTDIR}
 install -c updatedb/etc/osmdb.conf ${CONFDIR}
 
 cp updatedb/osmosis_conf/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
@@ -63,5 +60,5 @@ cp updatedb/osmosis_conf/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
 echo "Now you should create PostgreSQL/PostGIS database for OSM"
 echo "You can use createdb.sh with modification.(mandatory to modify)"
 echo "and set DBUSER/DBPASS and DBNAME to /etc/osmdb.conf"
-echo "then call /opt/tileman/bin/osm-loaddb"
+echo "then call /opt/tileman/bin/tileman-loaddb"
 
