@@ -20,6 +20,8 @@ install.sh:
 others:
  - remove lib/iniparser render-expired
    there are not nessesary now.
+ - reconstruct every directories and file names
+
 
 *v1.1 (2013.5.26)
  
