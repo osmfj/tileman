@@ -284,7 +284,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   http://www.geofabrik.de/
 
   ```
-  vi /etc/osmdb.conf
+  vi /etc/tileman.conf
  
   DBNAME=gis
   DBUSER=osm
@@ -312,7 +312,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
    cd $HOME
    mkdir tmp
    cd tmp
-   /opt/tileman/bin/osm-loaddb 
+   /opt/tileman/bin/tileman-load 
    ```
    
 9. mapnik openstreetmap style and more
