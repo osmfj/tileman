@@ -1,3 +1,9 @@
+tileman (1.2-1) precise; urgency=low
+
+  * New release.
+
+ -- Hiroshi Miura <miurahr@linux.com>  Tue, 09 Jul 2013 08:09:50 +0900
+
 tileman (1.2~rc1-2) precise; urgency=low
 
   * Change architecture to all.
