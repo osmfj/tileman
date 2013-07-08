@@ -284,7 +284,7 @@ First it shows a test case for mapnik example-map tirex rendering configuration.
   http://www.geofabrik.de/
 
   ```
-  vi /etc/osmdb.conf
+  vi /etc/tileman.conf
  
   DBNAME=gis
   DBUSER=osm
