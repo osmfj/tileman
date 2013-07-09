@@ -52,8 +52,8 @@ fi
 
 # install updatedb utils
 echo "Install osm/postgis utilities..."
-install -c updatedb/bin/* ${DESTDIR}
-install -c updatedb/etc/*.conf ${CONFDIR}
+install -c bin/* ${DESTDIR}
+install -c etc/*.conf ${CONFDIR}
 
 cp updatedb/osmosis_conf/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
 
