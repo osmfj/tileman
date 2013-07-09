@@ -55,7 +55,7 @@ echo "Install osm/postgis utilities..."
 install -c bin/* ${DESTDIR}
 install -c etc/*.conf ${CONFDIR}
 
-cp updatedb/osmosis_conf/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
+cp osmosis/fabrik.txt ${OSMOSIS_WORK}/configuration.txt
 
 echo "Now you should create PostgreSQL/PostGIS database for OSM"
 echo "After you set DBUSER/DBPASS and DBNAME to /etc/tileman.conf"
