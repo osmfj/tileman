@@ -16,7 +16,7 @@ server {
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
     ';
-    root /opt/tileman/tiles/;
+    root /var/tileman/tiles/;
     try_files $uri $uri/ @tilecache;
   }
 
