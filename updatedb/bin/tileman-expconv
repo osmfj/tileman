@@ -1,4 +1,4 @@
-#!/usr/bin/env lua
+#!/usr/bin/env lua5.1
 --
 -- Copyright 2013, Hiroshi Miura, miurahr@osmf.jp
 -- Accept modifications by Stephan Knauss, info@osm-tools.org
