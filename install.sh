@@ -4,10 +4,11 @@ DISTRO=debian #ubuntu/debian
 #DISTRO=redhat #redhat/centos/fedora
 
 PREFIX=/opt/tileman
+
 DESTDIR=${PREFIX}/bin/
 HTMLDIR=${PREFIX}/html/
 CACHEDIR=${PREFIX}/cache/
-STATICDIR=$PREFIX/tiles/
+STATICDIR=${PREFIX}/tiles/
 
 CONFDIR=/etc/
 NGINX=${CONFDIR}/nginx
@@ -34,19 +35,13 @@ install nginx/ssl_params $NGINX/
 if [ "${DISTRO}" = "debian" ]; then
   install nginx/conf.d/* $NGINX/conf.d/
   install nginx/sites/* $NGINX/sites-available/
-  # example to enable configuration on ubuntu/debian
-  echo "You can now enable server configurations as follows:"
-  echo "ln -s $NGINX/sites-available/tileproxy $NGINX/sites-enabled/tileproxy"
-  echo "ln -s $NGINX/sites-available/tileproxy_ssl $NGINX/sites-enabled/tileproxy_ssl"
 else
-  install nginx/conf.d/lua.conf $NGINX/conf.d/_lua.conf
-  install nginx/conf.d/geoip.conf $NGINX/conf.d/_geoip.conf
-  install nginx/conf.d/tilecache.conf $NGINX/conf.d/_tilecache.conf
+  install nginx/conf.d/tileman.conf $NGINX/conf.d/_tileman.conf
   #
-  install nginx/sites/tileproxy $NGINX/conf.d/tileproxy.conf.ex
-  install nginx/sites/tileproxy_ssl $NGINX/conf.d/tileproxy_ssl.conf.ex
-  install nginx/sites/tileserver $NGINX/conf.d/tileserver.conf.ex
-  install nginx/sites/tileserver_ssl $NGINX/conf.d/tileserver_ssl.conf.ex
+  install nginx/sites/tileman-proxy $NGINX/conf.d/tileman-proxy.conf.ex
+  install nginx/sites/tileman-proxy-ssl $NGINX/conf.d/tileman-proxy-ssl.conf.ex
+  install nginx/sites/tileman-server $NGINX/conf.d/tileman-server.conf.ex
+  install nginx/sites/tileman-server-ssl $NGINX/conf.d/tileman-server-ssl.conf.ex
   echo "Please see $NGINX/conf.d/*.conf.ex for configuration examples."
 fi
 
