@@ -1,3 +1,9 @@
+tileman (1.2-2) precise; urgency=low
+
+  * Fix postgis version dependency. 1.5->2.0 
+
+ -- Hiroshi Miura <miurahr@linux.com>  Wed, 17 Jul 2013 08:18:51 +0900
+
 tileman (1.2-1) precise; urgency=low
 
   * New release.
