@@ -33,8 +33,8 @@ fi
 createuser -SdR $DBUSER
 createdb -E UTF8 -O $DBUSER $DBNAME
 createlang plpgsql $DBNAME
-$PSQL_BIN -d $DBNAME -f /usr/share/postgresql/9.1/contrib/postgis-1.5/postgis.sql
-$PSQL_BIN -d $DBNAME -f /usr/share/postgresql/9.1/contrib/postgis-1.5/spatial_ref_sys.sql
+$PSQL_BIN -d $DBNAME -f /usr/share/postgresql/9.1/contrib/postgis-2.0/postgis.sql
+$PSQL_BIN -d $DBNAME -f /usr/share/postgresql/9.1/contrib/postgis-2.0/spatial_ref_sys.sql
 
 $PSQL_BIN $DBNAME -c "ALTER TABLE geometry_columns OWNER TO $DBUSER"
 $PSQL_BIN $DBNAME -c "ALTER TABLE spatial_ref_sys OWNER TO $DBUSER"
