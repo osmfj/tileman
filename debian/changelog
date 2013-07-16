@@ -1,8 +1,10 @@
-tileman (1.2-2) precise; urgency=low
+tileman (1.3-1~rc1-1) precise; urgency=low
 
   * Fix postgis version dependency. 1.5->2.0 
+  * new drectory structures
+  * rename command names
 
- -- Hiroshi Miura <miurahr@linux.com>  Wed, 17 Jul 2013 08:18:51 +0900
+ -- Hiroshi Miura <miurahr@linux.com>  Wed, 17 Jul 2013 08:24:11 +0900
 
 tileman (1.2-1) precise; urgency=low
 
