@@ -5,10 +5,14 @@ apt-get update
 # add osmjapan PPA repository
 apt-get install -y python-software-properties
 apt-add-repository -y ppa:osmjapan/ppa
+apt-add-repository -y ppa:miurahr/openresty
+apt-add-repository -y ppa:osmjapan/testing
 apt-get update
 
-# install nginx
-apt-get install -y nginx-extras
+# install nginx/openresty
+apt-get install -y nginx-openresty
+#apt-get install -y nginx-extras # > 1.4.1-0ppa1
+
 
 # install mapnik
 apt-get install -y libmapnik-dev
@@ -46,14 +50,6 @@ apt-get install -y libxml2-dev python-libxml2 libsvg
 
 # install Redis-server
 apt-get install -y redis-server
-apt-get install -y lua-nginx-redis
 
 # setup postgis database
-su postgres /usr/bin/tileman-create
-
-# clone tileman source
-#cd /vagrant
-#git clone git://github.com/osmfj/tileman.git
-#git submodule init
-#git submodule update
-
+su postgres -c /usr/bin/tileman-create
