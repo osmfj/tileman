@@ -5,7 +5,6 @@ server {
   server_name tileserver;
 
   include tileman_ssl_params;
-  include common_location_params;
 
   location / {
     content_by_lua '

@@ -3,8 +3,6 @@ server {
   server_name tileserver;
   root   /var/www;
 
-  include common_location_params;
-
   location / {
     content_by_lua '
       -- required module

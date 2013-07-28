@@ -3,8 +3,6 @@ server {
   server_name tile;
   root   /var/www;
 
-  include common_location_params;
-
   location / {
     access_by_lua '
       local osm_tile = require "osm.tile"

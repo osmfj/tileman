@@ -1,7 +1,7 @@
 # This is a configuration for tile.openstreetmap.jp tileserver
 #   Author: Hiroshi Miura
 #   Release: 24 April, 2013
-#   Last update: 15 May, 2013
+#   Last update: 28 Jul, 2013
 #
 server {
   listen 80;
@@ -11,7 +11,16 @@ server {
   access_log  /var/log/nginx/tileserver_access.log combined;
   error_log   /var/log/nginx/tileserver_error.log info;
 
-  include common_location_params;
+  location = /favicon.ico {
+     log_not_found off;
+     access_log off;
+  }
+
+  location = /robots.txt {
+     allow all;
+     log_not_found off;
+     access_log off;
+  }
 
   location / {
     access_by_lua '
