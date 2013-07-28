@@ -16,7 +16,7 @@ server {
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
     ';
-    include tileproxy_params;
+    include tileman_proxy_params;
     proxy_pass http://openstreetmap_backend;
   }
 }

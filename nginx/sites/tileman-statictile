@@ -21,7 +21,7 @@ server {
   }
 
   location @tilecache {
-    include tileproxy_params;
+    include tileman_proxy_params;
     proxy_pass http://openstreetmap_backend;
   }
 }

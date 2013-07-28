@@ -4,7 +4,7 @@ server {
   listen 443;
   server_name tile;
 
-  include ssl_params;
+  include tileman_ssl_params;
   include common_location_params;
 
   location / {
@@ -18,7 +18,7 @@ server {
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
     ';
-    include tileproxy_params;
+    include tileman_proxy_params;
     proxy_set_header X_FORWARDED_PROTO http;
     proxy_pass http://openstreetmap_backend;
   }
