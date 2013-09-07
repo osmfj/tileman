@@ -41,10 +41,7 @@ Also you can try it with Vagrant.
 License
 -- 
 
-The nginx recipe and lua script is distributed under AGPLv3.
-render_expire is made by Frederik Ramm <frederik@remote.org> and distirbuted
-by GPLv2.
-Each softwares are under the each licenses.
+TileMan is distributed under GPLv3 license.
 
 Maintainer
 --
