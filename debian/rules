@@ -12,8 +12,8 @@ override_dh_auto_install:
 	install -d $(CURDIR)/debian/tileman/etc/nginx/conf.d
 	install -d $(CURDIR)/debian/tileman/etc/nginx/sites-available
 	#
-	install -t $(CURDIR)/debian/tileman/usr/bin/ updatedb/bin/*
-	install -t $(CURDIR)/debian/tileman/etc/     updatedb/etc/*.conf
+	install -t $(CURDIR)/debian/tileman/usr/bin/ bin/*
+	install -t $(CURDIR)/debian/tileman/etc/     etc/*.conf
 	#
 	install -t $(CURDIR)/debian/tileman/etc/nginx/conf.d          nginx/conf.d/*
 	install -t $(CURDIR)/debian/tileman/etc/nginx/sites-available nginx/sites/*
