@@ -22,6 +22,6 @@ override_dh_auto_install:
 	install -d $(CURDIR)/debian/tileman/usr/share/tileman/
 	install -t $(CURDIR)/debian/tileman/usr/share/tileman/ data/Liancourt_Rocks_lang_ja_tiles.tar.bz2
 	#
-	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/tilecache.conf
-	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/geoip.conf
-	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/lua.conf
+	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/nginx/conf.d/tilecache.conf
+	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/nginx/conf.d/geoip.conf
+	echo '# <transit file for removal>' > $(CURDIR)/debian/tileman/etc/nginx/conf.d/lua.conf
