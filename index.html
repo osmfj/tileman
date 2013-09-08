@@ -20,7 +20,7 @@
     <header>
       <div class="inner">
         <h1>TileMan</h1>
-        <h2>OpenStreetMap &quot;Tile-cache&quot; and &quot;Tile-server&quot; recipe with Nginx and embeded Lua. A backend is Tirex, mapnik and PostGIS.</h2>
+        <h2>OpenStreetMap &quot;Tile-server&quot; frontend for Tirex rendering server powered by Nginx and Lua.</h2>
         <a href="https://github.com/osmfj/tileman" class="button"><small>View project on</small>GitHub</a>
       </div>
     </header>
@@ -28,27 +28,28 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h1>Tileserver recipe for tile.openstreetmap.jp</h1>
+          <h1>TileMan: tile server frontend</h1>
 
 <p>Author: Hiroshi Miura, OpenStreetMap Foundation Japan <a href="mailto:miurahr@osmf.jp">miurahr@osmf.jp</a></p>
 
-<p>Here is a repository to maintain tile.openstreetmap.jp tile cache/tile server.
+<p>Tileman is a tile server frontend.
 It uses following technologies.</p>
 
 <ul>
-<li><p>Nginx Web server (tested on nginx v1.4.1 + lua-module 0.8.1)
+<li><p>Nginx (v1.4.1 + lua-module 0.8.1 or later) or OpenResty(v1.4.1.3 or later)
 we provide PPA for ubuntu user. You need to select nginx-extras package.</p></li>
 <li><p>Tirex, rendering backend 0.4.1</p></li>
+<li><p>Mapnik 2.2.0</p></li>
 <li><p>PostGIS 2.0 /postgresql 9.1</p></li>
 <li><p>osm2pgsql</p></li>
 <li><p>osmosis (recommend v0.40 or later)</p></li>
-</ul><p>This recipe is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
+</ul><p>It is tested on Ubuntu 12.04.2(x86_64) but it may be
 useful for other platform and who want to run osm tile server.</p>
 
 <h2>Version</h2>
 
-<p>Ver 1.2.2
-Release: 17, July, 2013</p>
+<p>Ver 1.3
+Release: 8, Sept, 2013</p>
 
 <h2>Install</h2>
 
@@ -56,7 +57,7 @@ Release: 17, July, 2013</p>
 
 <h2>License</h2>
 
-<p>It is distributed under AGPLv3.</p>
+<p>It is distributed under GPLv3.</p>
 
 <h2>Maintainer</h2>
 
@@ -76,9 +77,6 @@ It is an asumption that postgis server has limited osm data in region.</p>
 <p>Lua script retrive x/y/z parameter and check an existence of 
 tile data. If it is out of area where the server provided, it goes upstream.</p>
 
-<p>We need another script to maintain tile generation control.
-We can get expire.list as "Tile expire method" explaines when importing diff.osm.
-<a href="http://wiki.openstreetmap.org/wiki/Tile_expire_methods">http://wiki.openstreetmap.org/wiki/Tile_expire_methods</a></p>
 
 <h2>planet import</h2>
 
@@ -104,11 +102,11 @@ For details, please refer doc/statictile.ja.txt</p>
         </section>
 
         <aside id="sidebar">
-          <a href="https://github.com/osmfj/tileman/archive/v1.2.2.zip" class="button">
+          <a href="https://github.com/osmfj/tileman/archive/v1.3.zip" class="button">
             <small>Download</small>
             stable zip file
           </a>
-          <a href="https://github.com/osmfj/tileman/archive/v1.2.2.tar.gz" class="button">
+          <a href="https://github.com/osmfj/tileman/archive/v1.3.tar.gz" class="button">
             <small>Download</small>
             stable tgz file
           </a>
