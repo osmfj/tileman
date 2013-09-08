@@ -1,3 +1,14 @@
+*v1.3 (2013.9.8)
+
+lua-nginx-osm
+ - based on lua-nginx-osm v0.30
+nginx/sites/tileman-*
+ - all configurations  prefixed with tileman-
+utilities
+ - utilities goes to bin/
+vagrant
+ - vagrant script is included for developers.
+
 *v1.2 (2013.7.4)
 
 lua-nginx-osm
