@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+useradd osm
+
 apt-get update
 
 # add osmjapan PPA repository
@@ -42,7 +44,7 @@ fi
 mkdir -p /opt/osmosis
 cd /opt/osmosis;tar zxf /vagrant/tmp/osmosis-latest.tgz
 mkdir -p /var/opt/osmosis
-chown vagrant /var/opt/osmosis
+chown osm /var/opt/osmosis
 
 # install tileman package
 apt-get install -y tileman
@@ -57,3 +59,7 @@ apt-get install -y redis-server
 
 # setup postgis database
 su postgres -c /usr/bin/tileman-create
+
+# default test data is taiwan (about 16MB by .pbf)
+echo  COUNTRY=taiwan >> /etc/tileman.conf
+(cd /home/osm;su osm -c /usr/bin/tileman-load)
