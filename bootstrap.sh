@@ -6,7 +6,7 @@ apt-get update
 apt-get install -y python-software-properties
 apt-add-repository -y ppa:osmjapan/ppa
 #apt-add-repository -y ppa:osmjapan/testing
-#apt-add-repository -y ppa:miurahr/openstreetmap
+apt-add-repository -y ppa:miurahr/openstreetmap
 apt-get update
 
 # install nginx/openresty
@@ -29,6 +29,7 @@ apt-get install -y geoip-database lua5.1 lua-bitop
 apt-get install -y lua-nginx-osm
 
 # install osm2pgsql
+apt-get install -y --force-yes openstreetmap-postgis-db-setup
 apt-get install -y osm2pgsql
 
 # install osmosis
@@ -55,4 +56,4 @@ apt-get install -y libxml2-dev python-libxml2 libsvg
 apt-get install -y redis-server
 
 # setup postgis database
-#su postgres -c /usr/bin/tileman-create
+su postgres -c /usr/bin/tileman-create
