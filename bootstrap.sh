@@ -34,7 +34,9 @@ apt-get install -y osm2pgsql
 # install osmosis
 apt-get install -y openjdk-7-jre
 cd /vagrant
+if [ -f osmosis-latest.tgz ]; then
 wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.tgz
+fi
 mkdir -p /opt/osmosis
 cd /opt/osmosis;tar zxf /vagrant/osmosis-latest.tgz
 mkdir -p /var/opt/osmosis
@@ -52,4 +54,4 @@ apt-get install -y libxml2-dev python-libxml2 libsvg
 apt-get install -y redis-server
 
 # setup postgis database
-su postgres -c /usr/bin/tileman-create
+#su postgres -c /usr/bin/tileman-create

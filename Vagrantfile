@@ -17,8 +17,7 @@ Vagrant.configure("2") do |config|
   # config.vm.box_url = "https://dl.dropboxusercontent.com/u/90779460/kvm.box"
 
   # If you use encrypted linux host directory, you should set synced_folder
-  # config.vm.synced_folder "/opt/vagrant/users/miurahr/", "/vagrant"
-  config.vm.synced_folder "../../", "/vagrant"
+  # such as config.vm.synced_folder "/opt/vagrant/users/miurahr/", "/vagrant"
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. 
