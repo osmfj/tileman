@@ -9,7 +9,7 @@ It uses following technologies.
 
 - Nginx Web server (tested on nginx v1.4.1 + lua-module 0.8.1)
   we provide PPA for ubuntu user. You need to select nginx-extras package.
-   (need lua module > 0.8.1)
+   (need lua module > 0.8.1) or nginx-openresty.
 
 - Tirex, rendering backend 0.4.1
 
