@@ -5,8 +5,8 @@ apt-get update
 # add osmjapan PPA repository
 apt-get install -y python-software-properties
 apt-add-repository -y ppa:osmjapan/ppa
-apt-add-repository -y ppa:miurahr/openresty
-apt-add-repository -y ppa:osmjapan/testing
+#apt-add-repository -y ppa:osmjapan/testing
+#apt-add-repository -y ppa:miurahr/openstreetmap
 apt-get update
 
 # install nginx/openresty
