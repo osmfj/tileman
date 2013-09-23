@@ -33,12 +33,13 @@ apt-get install -y osm2pgsql
 
 # install osmosis
 apt-get install -y openjdk-7-jre
-cd /vagrant
+mkdir /vagrant/tmp
+cd /vagrant/tmp
 if [ -f osmosis-latest.tgz ]; then
 wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.tgz
 fi
 mkdir -p /opt/osmosis
-cd /opt/osmosis;tar zxf /vagrant/osmosis-latest.tgz
+cd /opt/osmosis;tar zxf /vagrant/tmp/osmosis-latest.tgz
 mkdir -p /var/opt/osmosis
 chown vagrant /var/opt/osmosis
 
