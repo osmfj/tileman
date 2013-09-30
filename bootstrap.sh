@@ -63,4 +63,4 @@ su postgres -c /usr/bin/tileman-create
 
 # default test data is taiwan (about 16MB by .pbf)
 echo  COUNTRY=taiwan >> /etc/tileman.conf
-(cd /home/osm;su osm -c /usr/bin/tileman-load)
+(cd /tmp;su osm -c /usr/bin/tileman-load)
