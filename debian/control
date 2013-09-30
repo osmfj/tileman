@@ -11,7 +11,7 @@ Homepage: https://osmfj.github.io/tileman/
 Package: tileman
 Architecture: all
 Depends: ${shlibs:Depends}, ${misc:Depends},
-         {nginx-extras|nginx-openresty} (>=1.4.1),
+         nginx-extras | nginx-openresty (>=1.4.1),
          lua-nginx-osm, tirex-core, postgresql-9.1-postgis, geoip-database,
          osm2pgsql
 Suggests: osmosis
