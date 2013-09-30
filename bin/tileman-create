@@ -35,6 +35,7 @@ fi
 
 # sudo -u postgres -i -H
 createuser -SdR $DBUSER
+createdb -l C -T template0 -E UTF8 -O $DBUSER $DBNAME
 createdb -E UTF8 -O $DBUSER $DBNAME
 createlang plpgsql $DBNAME
 $PSQL_BIN -d $DBNAME -f /usr/share/postgresql/${POSTGRES_VER}/contrib/postgis-${POSTGIS_VER}/postgis.sql

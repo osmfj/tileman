@@ -20,8 +20,13 @@ apt-get install -y nginx-openresty
 apt-get install -y libmapnik-dev
 apt-get install -y ttf-unifont ttf-dejavu ttf-dejavu-core ttf-dejavu-extra
 
+# default locale will be taken from user locale so we set locale to UTF8
+sudo update-locale LANG=en_US.UTF-8
+export LANG=en_US.UTF-8
 # install postgis
 apt-get install -y postgresql-9.1 postgresql-contrib-9.1 postgresql-9.1-postgis
+# install osm2pgsql
+apt-get install -y --force-yes -o openstreetmap-postgis-db-setup::initdb=gis -o openstreetmap-postgis-db-setup::dbname=gis -o openstreetmap-postgis-db-setup::grant_user=osm openstreetmap-postgis-db-setup osm2pgsql
 
 # install Tirex
 apt-get install -y tirex-core tirex-backend-mapnik tirex-example-map
@@ -30,8 +35,6 @@ apt-get install -y tirex-core tirex-backend-mapnik tirex-example-map
 apt-get install -y geoip-database lua5.1 lua-bitop
 apt-get install -y lua-nginx-osm
 
-# install osm2pgsql
-apt-get install -y --force-yes -o openstreetmap-postgis-db-setup::initdb=gis -o openstreetmap-postgis-db-setup::dbname=gis -o openstreetmap-postgis-db-setup::grant_user=osm openstreetmap-postgis-db-setup osm2pgsql
 
 # install osmosis
 apt-get install -y openjdk-7-jre
