@@ -31,18 +31,16 @@ apt-get install -y geoip-database lua5.1 lua-bitop
 apt-get install -y lua-nginx-osm
 
 # install osm2pgsql
-apt-get install -y --force-yes openstreetmap-postgis-db-setup
-apt-get install -y osm2pgsql
+apt-get install -y --force-yes -o openstreetmap-postgis-db-setup::initdb=gis -o openstreetmap-postgis-db-setup::dbname=gis -o openstreetmap-postgis-db-setup::grant_user=osm openstreetmap-postgis-db-setup osm2pgsql
 
 # install osmosis
 apt-get install -y openjdk-7-jre
-mkdir /vagrant/tmp
-cd /vagrant/tmp
+cd /tmp
 if [ -f osmosis-latest.tgz ]; then
 wget http://bretth.dev.openstreetmap.org/osmosis-build/osmosis-latest.tgz
 fi
 mkdir -p /opt/osmosis
-cd /opt/osmosis;tar zxf /vagrant/tmp/osmosis-latest.tgz
+cd /opt/osmosis;tar zxf /tmp/osmosis-latest.tgz
 mkdir -p /var/opt/osmosis
 chown osm /var/opt/osmosis
 
