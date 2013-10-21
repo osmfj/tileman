@@ -11,6 +11,7 @@
 # ----------------------------
 # ChnageLog
 #
+# 2013-10-21 add error check for robustness
 # 2013-07-02 change command name to tileman-load
 # ----------------------------
 #
@@ -44,14 +45,26 @@ fi
 
 if [ "$ORIGIN" = "planet" ]; then
   wget http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
-  cp state.txt $WORKDIR_OSM/
-  wget http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
-  /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+  if [ $? = 0 ]; then
+    cp state.txt $WORKDIR_OSM/
+    wget http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+    if [ $? = 0 ]; then
+      /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+    fi
+  fi
 elif [ "$ORIGIN" = "geofabrik" ]; then
   wget http://download.geofabrik.de/$REGION/$COUNTRY-updates/state.txt
-  cp state.txt $WORKDIR_OSM/
-  wget http://download.geofabrik.de/$REGION/$COUNTRY-latest.osm.pbf
-  /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
+  if [ $? = 0 ]; then
+    cp state.txt $WORKDIR_OSM/
+    wget http://download.geofabrik.de/$REGION/$COUNTRY-latest.osm.pbf
+    if [ $? = 0 ]; then
+      /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
+    else
+      echo "download error occured:" $ORIGIN
+    fi
+  else
+    echo "download error occured:" $ORIGIN
+  fi
 else
   echo Unknown origin $ORIGIN
 fi

@@ -114,12 +114,24 @@ shift $((OPTIND - 1))
 check_exec
 if [ "${TILE_UPDATE_FLAG}" = "yes" ]; then
   $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE
-  $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE 
-  cat $EXPIRE_FILE | tileman-expconv $MAPNAME $MAXZOOM | $TIREX_BATCH_BIN -f $FILTER -p 10 &
-  cat $EXPIRE_FILE | tileman-expconv $MAPNAME $EXPIRE_ZOOM $MINZOOM | $TIREX_BATCH_BIN -f $FILTER -p 15 &
+  if [ $? = 0 ]; then
+    $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE 
+    if [ $? = 0 ]; then
+      cat $EXPIRE_FILE | tileman-expconv $MAPNAME $MAXZOOM | $TIREX_BATCH_BIN -f $FILTER -p 10 &
+      cat $EXPIRE_FILE | tileman-expconv $MAPNAME $EXPIRE_ZOOM $MINZOOM | $TIREX_BATCH_BIN -f $FILTER -p 15 &
+    else
+      echo "error occured when " $OSM2PGSQL $OSM2PGSQL_OPT
+    fi
+  else
+    echo "error occured when " $OSMOSIS_BIN $OSMOSIS_OPT
+  fi
 else
   $OSMOSIS_BIN $OSMOSIS_OPT $OSC_PIPE
-  $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
+  if [ $? = 0 ]; then
+    $OSM2PGSQL_BIN $OSM2PGSQL_OPT -o $EXPIRE_FILE $OSC_PIPE
+  else
+    echo "error occured when " $OSMOSIS_BIN $OSMOSIS_OPT
+  fi
 fi
 rm -f $OSC_PIPE
 rm -f $EXPIRE_FILE
