@@ -2,6 +2,8 @@
 
 useradd osm
 
+export DEBIAN_FRONTEND=noninteractive
+
 apt-get update
 
 # add osmjapan PPA repository
