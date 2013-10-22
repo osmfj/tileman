@@ -38,9 +38,12 @@ ORIGIN=${ORIGIN:=geofabrik} # or planet
 REGION=${REGION:=asia}
 COUNTRY=${COUNTRY:=japan}
 
-OPTIONS="-c -d $DBNAME -U $DBUSER -m -C $MEMSIZE --drop --hstore --slim --number-processes $PROCESS_NUM -S $STYLEFILE "
+OPTIONS="-c -d $DBNAME -U $DBUSER -m -C $MEMSIZE --hstore --slim --number-processes $PROCESS_NUM -S $STYLEFILE "
 if [ ! "$DBPASS" = "" ] ; then
 OPTIONS+=" -p $DBPASS "
+fi
+if [ "$SLIMDBDROP" = "YES" -o "$SLIMDBDROP" = "yes" -o "$SLIMDBDROP" = "true" -o "$SLIMDBDROP" = "TRUE" ]; then
+OPTIONS+=" --drop "
 fi
 
 if [ "$ORIGIN" = "planet" ]; then
