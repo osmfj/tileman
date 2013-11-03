@@ -26,7 +26,7 @@ server {
     access_by_lua '
       local osm_tile = require "osm.tile"
       local minz = 0
-      local maxz = 18
+      local maxz = 19
       local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
       local ok = osm_tile.check_integrity_xyzm(x, y, z, minz, maxz)
       if not ok then
@@ -45,7 +45,7 @@ server {
       local osm_tile = require "osm.tile"
       local osm_data = require "osm.data"
       local x, y, z = osm_tile.get_cordination(ngx.var.uri, "", "png")
-      if z < 8 then -- low zoom use global site cache 
+      if z < 5 then -- low zoom use global site cache
         ngx.exec("@tilecache")
       end
       local region = osm_data.get_region("japan")
@@ -72,7 +72,7 @@ server {
       end
       -- ask tirex to render it
       local priority = 1
-      local maxz = math.min(18, z + 2)
+      local maxz = math.min(19, z + 2)
       local ok = tirex.request(map, x, y, z, maxz, priority)
       if not ok then
          return ngx.exit(ngx.HTTP_INTERNAL_SERVER_ERROR)
