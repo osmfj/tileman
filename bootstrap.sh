@@ -1,8 +1,21 @@
 #!/usr/bin/env bash
 
+ROOTDIR=/vagrant
+
 useradd osm
 
 export DEBIAN_FRONTEND=noninteractive
+
+# use Apt-cacher on host
+#
+# if you use apt-cacher on host to reduce downloding time,
+# please remove comment out -- recoomend.
+
+#echo 'Acquire::http::Proxy "http://192.168.123.1:3142";' >> /etc/apt/apt.conf.d/01tileman
+
+# don't install recommend packages to reduce size
+echo 'APT::Install-Recommends "0"; \
+      APT::Install-Suggests "0";' >> /etc/apt/apt-conf.d/01tileman
 
 apt-get update
 
@@ -35,8 +48,6 @@ apt-get install -y tirex-core tirex-backend-mapnik tirex-example-map
 
 # install Lua OSM library
 apt-get install -y geoip-database lua5.1 lua-bitop
-apt-get install -y lua-nginx-osm
-
 
 # install osmosis
 apt-get install -y openjdk-7-jre
@@ -49,20 +60,25 @@ cd /opt/osmosis;tar zxf /tmp/osmosis-latest.tgz
 mkdir -p /var/opt/osmosis
 chown osm /var/opt/osmosis
 
-# install tileman package
-apt-get install -y tileman
 
 # development dependencies
 apt-get install -y devscripts debhelper dh-autoreconf build-essential git
 apt-get install -y libfreexl-dev libgdal-dev python-gdal gdal-bin
 apt-get install -y libxml2-dev python-libxml2 libsvg
 
-# install Redis-server
-apt-get install -y redis-server
+apt-get install -y libjs-leaflet
+apt-get install -y openstreetmap-mapnik-stylesheet-data
 
-# setup postgis database
-su postgres -c /usr/bin/tileman-create
+# install tileman package
+apt-get install -y lua-nginx-osm tileman
+cd /vagrant/lua-nginx-osm
+debulid -us -uc -b -i
+cd ..
+dpkg -i lua-nginx-osm*.deb
+#debuild -us -uc -b -i
+#dpkg -i tileman*.deb
 
-# default test data is taiwan (about 16MB by .pbf)
-echo  COUNTRY=taiwan >> /etc/tileman.conf
-(cd /tmp;su osm -c /usr/bin/tileman-load)
+# update tileman-* utils
+install ${ROOTDIR}/bin/tileman-* /usr/bin/
+
+${ROOTDIR}/test/load.sh
