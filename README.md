@@ -19,15 +19,15 @@ It uses following technologies.
 
 - osmosis (recommend v0.40 or later)
 
-It is intended to run on Ubuntu 12.04.2(x86_64) server but it may be
+It is intended to run on Ubuntu 12.04.2 server but it may be
 useful for other platform and who want to run osm tile server.
 
 
 Version
 ----
 
-Ver 1.3
-Release: 8, Sept. 2013
+Ver 1.4
+Release: 24, Oct. 2013
 
 
 Install

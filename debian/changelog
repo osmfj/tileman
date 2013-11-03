@@ -1,3 +1,10 @@
+tileman (1.4) precise; urgency=low
+
+  * New release update.
+  * Fix tileman-* commands
+
+ -- Hiroshi Miura <miurahr@linux.com>  Tue, 22 Oct 2013 21:57:48 +0900
+
 tileman (1.3) precise; urgency=low
 
   * Upstream update
