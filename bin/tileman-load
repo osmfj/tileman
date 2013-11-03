@@ -46,12 +46,70 @@ if [ "$SLIMDBDROP" = "YES" -o "$SLIMDBDROP" = "yes" -o "$SLIMDBDROP" = "true" -o
 OPTIONS+=" --drop "
 fi
 
-if [ "$ORIGIN" = "planet" ]; then
 
-  wget -N http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
-  if [ $? = 0 ]; then
-    wget -N http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+function check_exec () {
+  if [ ! -x $OSMOSIS_BIN ] ; then
+     echo "Error: $OSMOSIS_BIN doesn't exist."
+     echo
+     exit 1
+  elif [ ! -x $OSM2PGSQL_BIN ] ; then
+     echo "Error: $OSM2PGSQL_BIN doesn't exist."
+     echo
+     exit 1
+  fi
+}
+
+while getopts "bcdhuv" opts; do
+    case $opts in 
+    c)
+    CLEAN_FLAG=yes
+    ;;
+    d)
+    DEBUG_FLAG=yes
+    ;;
+    h)
+    #show help and exit
+    echo "$0: load osm pbf into postgis db"
+    echo " "
+    echo "It takes addtional options as follows: "
+    echo "'-c': clean downloaded pbf files"
+    echo "'-d': show debug messages"
+    echo "'-p': use pre-downloaded data"
+    echo "'-v': show version"
+    exit 0
+    ;;
+    p)
+    PREDOWN=yes
+    ;;
+    v)
+    echo "$0: load osm pbf into postgis db"
+    exit 0
+    ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+check_exec
+
+if [ "${PREDOWN}" = "yes" ]; then
+  if [ "$ORIGIN" = "planet" ]; then
+      /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
+      if [ $? = 0 ]; then
+        cp state.txt $WORKDIR_OSM/
+      fi
+  elif [ "$ORIGIN" = "geofabrik" ]; then
+      /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
+      if [ $? = 0 ]; then
+        cp state.txt $WORKDIR_OSM/
+      fi
+  else
+    echo "Error occured:" $ORIGIN
+  fi
+elif [ "$ORIGIN" = "planet" ]; then
+    wget -N http://planet.openstreetmap.org/redaction-period/minute-replicate/state.txt
     if [ $? = 0 ]; then
+      wget -N http://planet.openstreetmap.org/pbf/planet-latest.osm.pbf
+      if [ $? = 0 ]; then
       /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
       if [ $? = 0 ]; then
         cp state.txt $WORKDIR_OSM/
@@ -80,4 +138,4 @@ else
 
   echo Unknown origin $ORIGIN
 
-fi # $ORIGIN
+fi # $PREDOWN / $ORIGIN
