@@ -5,6 +5,11 @@ Vagrant.configure("2") do |config|
   config.vm.box = "precise64"
   config.vm.provision :shell, :path => "bootstrap.sh"
 
+  ## If you want to load test db and run test automatically, 
+  ## enable a part of commented out.
+  # config.vm.provision :shell, :path => "test/load.sh"
+  # config.vm.provision :shell, :path => "test/run.sh"
+
   # please run:
   #  $ vagrant init
   #  $ vagrant box add precise64 <URL>
