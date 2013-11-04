@@ -3,7 +3,7 @@
 # tileman-update
 #
 # Get osm changes and update PostGIS database
-# osmosis configuration should be in $WORKER_DIR
+# osmosis configuration should be in $WORKDIR
 #
 # Licensed in GPLv3
 # Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
@@ -11,6 +11,8 @@
 # ----------------------------
 # ChnageLog
 #
+# 2013-11-03 check strictly command return values
+             change osmosis directories
 # 2013-07-02 change command name to tileman-update
 # ----------------------------
 #
@@ -19,12 +21,13 @@ CONF=tileman.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
-WORKDIR_OSM=${WORKDIR_OSM:=/var/opt/osmosis}
+WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}
 DBNAME=${DBNAME:=gis}
-OSMOSIS_BIN=${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
+OSMOSIS_BIN=${OSMOSIS_BIN:=/usr/bin/osmosis}
 OSM2PGSQL_BIN=${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
 PSQL_BIN=${PSQL_BIN:=/usr/bin/psql}
+SLIMDBDROP=${SLIMDBDROP:=no}
 
 TIREX_BATCH_BIN=${TIREX_BATCH_BIN:=/usr/bin/tirex-batch}
 TILEDIR=${TILEDIR:=/var/lib/tirex/tiles}
@@ -32,17 +35,23 @@ MAPNAME=${MAPNAME:=custom}
 
 EXPIRE_ZOOM=${EXPIRE_ZOOM:=15}
 MINZOOM=${MINZOOM:=12}
-MAXZOOM=${MAXZOOM:=18}
+MAXZOOM=${MAXZOOM:=19}
 FILTER=${FILTER:=exists}
 
-UPDATE_DIR=$WORKDIR_OSM/updates/`date +%y%m%d`
+UPDATE_DIR=$WORKDIR/updates/`date +%y%m%d`
 OSC_PIPE=$UPDATE_DIR/changes_osc.$$
 EXPIRE_FILE=$UPDATE_OSM/expire.list.$$
 UPDATE_LOG=$UPDATE_DIR/update.log.$$
 
-OSMOSIS_OPT="--read-replication-interval workingDirectory=$WORKDIR_OSM --simplify-change --write-xml-change"
+OSMOSIS_OPT="--read-replication-interval workingDirectory=$WORKDIR --simplify-change --write-xml-change"
 DB_OPT="-U $DBUSER -d $DBNAME"
-OSM2PGSQL_OPT="--append $DB_OPT --slim -a -e${EXPIRE_ZOOM}"
+OSM2PGSQL_OPT="--append $DB_OPT -a -e${EXPIRE_ZOOM}"
+
+if [ "$SLIMDBDROP" = "NO" -o "$SLIMDBDROP" = "no" -o "$SLIMDBDROP" = "false" -o "$SLIMDBDROP" = "FALSE" ]; then
+  if [ "$USESLIMDB" = "YES" -o "$USESLIMDB" = "yes" -o "$USESLIMDB" = "true" -o "$USESLIMDB" = "TRUE" ]; then
+    OSM2PGSQL_OPT +=" --slim "
+  fi
+fi
 
 function cleanup_bbox () {
     $PSQL_BIN $DB_OPT -w << _EOL_

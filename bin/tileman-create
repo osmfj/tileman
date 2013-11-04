@@ -11,6 +11,8 @@
 # ----------------------------
 # ChnageLog
 #
+# 2013-11-03 Fix to support UTF8
+#            Fix hstore error
 # 2013-07-17 postgres/postgis version change
 # 2013-07-02 change command name to tileman-create
 # ----------------------------
@@ -41,7 +43,7 @@ createlang plpgsql $DBNAME
 $PSQL_BIN -d $DBNAME -f /usr/share/postgresql/${POSTGRES_VER}/contrib/postgis-${POSTGIS_VER}/postgis.sql
 $PSQL_BIN -d $DBNAME -f /usr/share/postgresql/${POSTGRES_VER}/contrib/postgis-${POSTGIS_VER}/spatial_ref_sys.sql
 
-$PSQL_BIN $DBNAME -c "CREATE EXTENSION hstore"
+$PSQL_BIN $DBNAME -c "CREATE EXTENSION hstore IF NOT EXIST hstore"
 
 $PSQL_BIN $DBNAME -c "ALTER TABLE geometry_columns OWNER TO $DBUSER"
 $PSQL_BIN $DBNAME -c "ALTER TABLE spatial_ref_sys OWNER TO $DBUSER"

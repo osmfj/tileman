@@ -3,7 +3,7 @@
 # tileman-load
 #
 # Get osm planet and load into PostGIS database
-# osmosis configuration should be in $WORKER_DIR
+# osmosis configuration should be in $WORKDIR
 #
 # Licensed in GPLv3
 # Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
@@ -20,13 +20,13 @@ CONF=tileman.conf
 # Read configuration variable file if it is present
 [ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
 
-WORKDIR_OSM=${WORKDIR_OSM:=/var/opt/osmosis}
+WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}
 DBNAME=${DBNAME:=gis}
-OSMOSIS_BIN=${OSMOSIS_BIN:=/opt/osmosis/bin/osmosis}
+OSMOSIS_BIN=${OSMOSIS_BIN:=/usr/bin/osmosis}
 OSM2PGSQL_BIN=${OSM2PGSQL_BIN:=/usr/bin/osm2pgsql}
 PSQL_BIN=${PSQL_BIN:=/usr/bin/psql}
-
+USESLIMDB=${USESLIMDB:=yes}
 #DBPASS=
 
 MEMSIZE=${MEMSIZE:=6096}
@@ -38,10 +38,15 @@ ORIGIN=${ORIGIN:=geofabrik} # or planet
 REGION=${REGION:=asia}
 COUNTRY=${COUNTRY:=japan}
 
-OPTIONS="-c -d $DBNAME -U $DBUSER -m -C $MEMSIZE --hstore --slim --number-processes $PROCESS_NUM -S $STYLEFILE "
+OPTIONS="-c -d $DBNAME -U $DBUSER -m -C $MEMSIZE --hstore --number-processes $PROCESS_NUM -S $STYLEFILE "
 if [ ! "$DBPASS" = "" ] ; then
 OPTIONS+=" -p $DBPASS "
 fi
+
+if [ "$USESLIMDB" = "YES" -o "$USESLIMDB" = "yes" -o "$USESLIMDB" = "true" -o "$USESLIMDB" = "TRUE" ]; then
+OPTIONS+=" --slim "
+fi
+
 if [ "$SLIMDBDROP" = "YES" -o "$SLIMDBDROP" = "yes" -o "$SLIMDBDROP" = "true" -o "$SLIMDBDROP" = "TRUE" ]; then
 OPTIONS+=" --drop "
 fi
@@ -95,12 +100,12 @@ if [ "${PREDOWN}" = "yes" ]; then
   if [ "$ORIGIN" = "planet" ]; then
       /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
       if [ $? = 0 ]; then
-        cp state.txt $WORKDIR_OSM/
+        cp state.txt $WORKDIR/
       fi
   elif [ "$ORIGIN" = "geofabrik" ]; then
       /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
       if [ $? = 0 ]; then
-        cp state.txt $WORKDIR_OSM/
+        cp state.txt $WORKDIR/
       fi
   else
     echo "Error occured:" $ORIGIN
@@ -112,7 +117,7 @@ elif [ "$ORIGIN" = "planet" ]; then
       if [ $? = 0 ]; then
       /usr/bin/osm2pgsql $OPTIONS planet-latest.osm.pbf
       if [ $? = 0 ]; then
-        cp state.txt $WORKDIR_OSM/
+        cp state.txt $WORKDIR/
       fi
     fi
   fi
@@ -125,7 +130,7 @@ elif [ "$ORIGIN" = "geofabrik" ]; then
     if [ $? = 0 ]; then
       /usr/bin/osm2pgsql $OPTIONS $COUNTRY-latest.osm.pbf
       if [ $? = 0 ]; then
-        cp state.txt $WORKDIR_OSM/
+        cp state.txt $WORKDIR/
       fi
     else
       echo "download error occured:" $ORIGIN
