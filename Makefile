@@ -18,11 +18,11 @@ DESTDIR  ?=	${PREFIX}/bin/
 HTMLDIR  ?=	${PREFIX}/html/
 CACHEDIR ?=	${PREFIX}/cache/
 STATICDIR?=	${PREFIX}/tiles/
-CONFDIR  ?=	/etc/
+CONFDIR  ?=	${PREFIX}/etc/
 NGINX    ?=	${CONFDIR}/nginx
-OSMOSIS_WORK?=	/var/opt/osmosis
+WORKDIR  ?=	${PREFIX}/osmosis
 
-.PHONY: install
+.PHONY: install test test_install test_service_start test_db_load
 
 install: directories nginx_$(DISTRO) utils osmosis statictiles
 
@@ -59,4 +59,25 @@ utils:
 	install -c etc/*.conf $(CONFDIR)
 
 osmosis:
-	cp osmosis/fabrik.txt $(OSMOSIS_WORK)/configuration.txt
+	cp osmosis/fabrik.txt $(WORKDIR)/configuration.txt
+
+test: test_$(DISTRO)
+
+test_debian:
+
+test_redhat:
+
+test_install: test_install_$(DISTRO)
+
+test_install_debian:
+	sudo test/test_install.sh
+
+test_install_redhat:
+
+test_service_start:
+	sudo service tirex-backend-manager start
+	sudo service tirex-master start
+	sudo service nginx start
+
+test_dbload:
+	sudo test/load.sh
