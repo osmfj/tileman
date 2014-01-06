@@ -2,7 +2,7 @@
 #
 # bootstrap script for vagrant env
 #
-ROOTDIR=/vagrant
+ROOTDIR ?= /vagrant
 
 useradd osm
 
@@ -77,7 +77,7 @@ apt-get install -qq openstreetmap-mapnik-stylesheet-data
 #  git submodule init; \
 #  git submodule update; \
 #  cd lua-nginx-osm; \
-#  debulid -us -uc -b -i; \
+#  debuild -us -uc -b -i; \
 #  cd .. ; dpkg -i lua-nginx-osm*.deb)
 ##
 apt-get install -qq lua-nginx-osm
