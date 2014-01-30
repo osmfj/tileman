@@ -59,7 +59,7 @@ apt-get install -qq geoip-database lua5.1 lua-bitop
 
 # install osmosis
 apt-get install -qq openjdk-7-jre
-osmosis/osmosis-installer.sh
+${ROOTDIR}/osmosis/osmosis-installer.sh
 
 # development dependencies
 apt-get install -qq devscripts debhelper dh-autoreconf build-essential git
@@ -83,5 +83,8 @@ apt-get install -qq openstreetmap-mapnik-stylesheet-data
 apt-get install -qq lua-nginx-osm
 
 # install tileman
-(cd ${ROOTDIR}; \
- make  PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis install
+apt-get install -qq tileman
+
+# install from source
+#(cd ${ROOTDIR}; \
+# make  PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis install
