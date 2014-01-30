@@ -13,16 +13,18 @@ Vagrant.configure("2") do |config|
   # please run:
   #  $ vagrant init
   #  $ vagrant box add precise64 <URL>
-  #  $ vagrant up --provider=kvm 
+  #  $ vagrant up --provider=kvm  # if you use kvm
   #
-  # URL for virtualbox
-  # config.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  config.vm.provider :virtualbox do |vb, override|
+   override.vm.box     = "precise64"
+   override.vm.box_url = "http://files.vagrantup.com/precise64.box"
+  end
   
-  # URL for kvm
-  # config.vm.box_url = "https://dl.dropboxusercontent.com/u/90779460/kvm.box"
-
-  # If you use encrypted linux host directory, you should set synced_folder
-  # such as config.vm.synced_folder "/opt/vagrant/users/miurahr/", "/vagrant"
+  config.vm.provider :kvm do |kvm, override| 
+    kvm.gui = true
+    override.vm.box     = "precise64"
+    override.vm.box_url = "https://s3-ap-northeast-1.amazonaws.com/miurahr-public/precise64-kvm.box"
+  end
 
   # Create a forwarded port mapping which allows access to a specific port
   # within the machine from a port on the host machine. 
