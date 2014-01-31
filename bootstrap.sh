@@ -24,6 +24,7 @@ apt-get update -qq
 # add osmjapan PPA repository
 apt-get install -qq python-software-properties
 apt-add-repository -y ppa:osmjapan/ppa
+apt-add-repository -y ppa:lwarx/postgis-pg93-bp
 
 # testing packages
 #apt-add-repository -y ppa:osmjapan/testing
@@ -46,7 +47,7 @@ apt-get install -qq ttf-unifont ttf-dejavu ttf-dejavu-core ttf-dejavu-extra
 sudo update-locale LANG=en_US.UTF-8
 export LANG=en_US.UTF-8
 # install postgis
-apt-get install -qq postgresql-9.1 postgresql-contrib-9.1 postgresql-9.1-postgis
+apt-get install -qq postgresql-9.3 postgresql-contrib-9.3 postgresql-9.3-postgis-2.1
 # install osm2pgsql
 apt-get install --no-install-recommends -qq osm2pgsql
 #apt-get install -y --force-yes -o openstreetmap-postgis-db-setup::initdb=gis -o openstreetmap-postgis-db-setup::dbname=gis -o openstreetmap-postgis-db-setup::grant_user=osm openstreetmap-postgis-db-setup osm2pgsql
