@@ -3,4 +3,4 @@
 	url = https://github.com/miurahr/lua-nginx-osm.git
 [submodule "neturl"]
 	path = neturl
-	url = git@github.com:miurahr/neturl.git
+	url = https://github.com/miurahr/neturl.git
