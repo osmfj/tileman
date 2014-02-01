@@ -2,7 +2,7 @@
 #
 # bootstrap script for vagrant env
 #
-ROOTDIR ?= /vagrant
+ROOTDIR=${ROOTDIR:=/vagrant}
 
 useradd osm
 
