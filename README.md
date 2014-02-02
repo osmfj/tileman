@@ -27,7 +27,7 @@ Version
 ----
 
 Ver 1.4
-Release: 24, Oct. 2013
+Release: 3, Feb. 2014
 
 
 Install

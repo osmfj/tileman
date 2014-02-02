@@ -1,3 +1,29 @@
+*v1.4 (2014.2.3)
+
+lua-nginx-osm(0.43)
+ - More region data
+vagrant
+ - bootstrap shell fix
+Travis-CI
+ - Now tested with travis-CI
+Tileman-create
+ - fix db create error in UTF8
+ - create missing hstore extension
+Tileman-load
+ - Improve error check
+ - Help message
+Tileman-update
+ - force not to run in parallel
+ - remove ideas to use FIFO(named-pipe)
+ - Download pbf file with timestamp check
+ - fix drop option
+nginx/sites/tileman-*
+ - Zoom 19 support
+ - add Proxy parameter X-Real-IP
+/etc/tileman.conf
+ - default to 1core CPU/1GB mem
+
+
 *v1.3 (2013.9.8)
 
 lua-nginx-osm
