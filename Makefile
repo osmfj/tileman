@@ -7,7 +7,7 @@ ifeq ($(strip $(DISTRO_ID)),'Ubuntu')
 DISTRO=debian
 else ifeq ($(strip $(DISTRO_ID)),'Debian')
 DISTRO=debian
-else ifqe ($(strip $(DISTRO_ID)),'LinuxMint')
+else ifeq ($(strip $(DISTRO_ID)),'LinuxMint')
 DISTRO=debian
 else
 DISTRO=redhat
