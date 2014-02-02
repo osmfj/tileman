@@ -24,6 +24,8 @@ WORKDIR  ?=	${PREFIX}/osmosis
 
 .PHONY: install test test_install test_service_start test_db_load
 
+all:
+
 install: directories nginx_$(DISTRO) utils osmosis statictiles
 
 directories:

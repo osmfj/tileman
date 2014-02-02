@@ -1,3 +1,9 @@
+tileman (1.4.1) precise; urgency=low
+
+  * makefile update 
+
+ -- Hiroshi Miura <miurahr@linux.com>  Mon, 03 Feb 2014 08:18:23 +0900
+
 tileman (1.4) precise; urgency=low
 
   * New release update.

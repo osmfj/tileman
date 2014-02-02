@@ -26,7 +26,7 @@ useful for other platform and who want to run osm tile server.
 Version
 ----
 
-Ver 1.4
+Ver 1.4.1
 Release: 3, Feb. 2014
 
 
