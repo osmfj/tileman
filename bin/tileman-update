@@ -18,7 +18,7 @@
 # ----------------------------
 #
 NAME=tileman-update
-CONF=tileman.conf
+CONF=/etc/tileman.conf
 
 while getopts "bchi:u" opts; do
     case $opts in
@@ -35,8 +35,9 @@ while getopts "bchi:u" opts; do
     echo "It takes addtional options as follows: "
     echo "'-b': clwan-up out-of-bounding-box ways"
     echo "'-c': compact size of PostGIS."
+    echo "'-h': show this message"
     echo "'-i': configuration file"
-    echo "'-u': launch expire_rended to refresh expired tile"
+    echo "'-u': launch tirex_batch to refresh expired tile"
     exit 0
     ;;
     i)
@@ -50,11 +51,11 @@ done
 shift $((OPTIND - 1))
 
 # Read configuration variable file
-if [ ! -r "/etc/${CONF}" ]; then
+if [ ! -r "${CONF}" ]; then
     echo "Configuration file is not found: ${CONF}"
     exit 1
 fi
-. "/etc/${CONF}"
+. "${CONF}"
 
 WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}

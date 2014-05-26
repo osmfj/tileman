@@ -17,15 +17,12 @@
 # ----------------------------
 #
 NAME=tileman-load
-CONF=tileman.conf
+CONF=/etc/tileman.conf
 
-while getopts "bcdhi:uv" opts; do
+while getopts "cdhi:p" opts; do
     case $opts in
     c)
     CLEAN_FLAG=yes
-    ;;
-    d)
-    DEBUG_FLAG=yes
     ;;
     h)
     #show help and exit
@@ -33,10 +30,18 @@ while getopts "bcdhi:uv" opts; do
     echo " "
     echo "It takes addtional options as follows: "
     echo "'-c': clean downloaded pbf files"
-    echo "'-d': show debug messages"
+    echo "'-h': show this message"
     echo "'-i': configuration file"
     echo "'-p': use pre-downloaded data"
-    echo "'-v': show version"
+    echo " "
+    echo "examples:"
+    echo " "
+    echo "$0 -i /etc/tileman-alternative.conf"
+    echo "Download pbf file and load data into PostgreSQL"
+    echo " "
+    echo "cd work/"
+    echo "wget planet-latest-osm.pdf"
+    echo "$0 -p"
     exit 0
     ;;
     i)
@@ -45,20 +50,16 @@ while getopts "bcdhi:uv" opts; do
     p)
     PREDOWN=yes
     ;;
-    v)
-    echo "$0: load osm pbf into postgis db"
-    exit 0
-    ;;
     esac
 done
 shift $((OPTIND - 1))
 
 # Read configuration variable file
-if [ ! -r "/etc/${CONF}" ]; then
+if [ ! -r "${CONF}" ]; then
     echo "Configuration file is not found: ${CONF}"
     exit 1
 fi
-. "/etc/${CONF}"
+. "${CONF}"
 
 WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}

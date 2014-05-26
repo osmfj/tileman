@@ -19,7 +19,7 @@
 # ----------------------------
 #
 NAME=tileman-create
-CONF=tileman.conf
+CONF=/etc/tileman.conf
 
 while getopts "hi:" opts; do
     case $opts in
@@ -29,7 +29,6 @@ while getopts "hi:" opts; do
     echo " "
     echo "It takes addtional options as follows: "
     echo "'-h': show help"
-    echo "'-d': show debug messages"
     echo "'-i': specify configuration file"
     exit 0
     ;;
@@ -41,11 +40,11 @@ done
 shift $((OPTIND - 1))
 
 # Read configuration variable file
-if [ ! -r "/etc/${CONF}" ]; then
+if [ ! -r "${CONF}" ]; then
     echo "Configuration file is not found: ${CONF}"
     exit 1
 fi
-. "/etc/${CONF}"
+. "${CONF}"
 
 DBUSER=${DBUSER:=osm}
 DBNAME=${DBNAME:=gis}
