@@ -6,19 +6,59 @@
 # osmosis configuration should be in $WORKDIR
 #
 # Licensed in GPLv3
-# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+# Copyright 2013-2014, Hiroshi Miura <miurahr@osmf.jp>
 #
 # ----------------------------
 # ChnageLog
 #
+# 2014-05-26 Support -i option to specify config file
 # 2013-10-21 add error check for robustness
 # 2013-07-02 change command name to tileman-load
 # ----------------------------
 #
 NAME=tileman-load
 CONF=tileman.conf
-# Read configuration variable file if it is present
-[ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
+
+while getopts "bcdhi:uv" opts; do
+    case $opts in
+    c)
+    CLEAN_FLAG=yes
+    ;;
+    d)
+    DEBUG_FLAG=yes
+    ;;
+    h)
+    #show help and exit
+    echo "$0: load osm pbf into postgis db"
+    echo " "
+    echo "It takes addtional options as follows: "
+    echo "'-c': clean downloaded pbf files"
+    echo "'-d': show debug messages"
+    echo "'-i': configuration file"
+    echo "'-p': use pre-downloaded data"
+    echo "'-v': show version"
+    exit 0
+    ;;
+    i)
+    CONF="$OPTARG"
+    ;;
+    p)
+    PREDOWN=yes
+    ;;
+    v)
+    echo "$0: load osm pbf into postgis db"
+    exit 0
+    ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+# Read configuration variable file
+if [ ! -r "/etc/${CONF}" ]; then
+    echo "Configuration file is not found: ${CONF}"
+    exit 1
+fi
+. "/etc/${CONF}"
 
 WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}
@@ -63,36 +103,6 @@ function check_exec () {
      exit 1
   fi
 }
-
-while getopts "bcdhuv" opts; do
-    case $opts in 
-    c)
-    CLEAN_FLAG=yes
-    ;;
-    d)
-    DEBUG_FLAG=yes
-    ;;
-    h)
-    #show help and exit
-    echo "$0: load osm pbf into postgis db"
-    echo " "
-    echo "It takes addtional options as follows: "
-    echo "'-c': clean downloaded pbf files"
-    echo "'-d': show debug messages"
-    echo "'-p': use pre-downloaded data"
-    echo "'-v': show version"
-    exit 0
-    ;;
-    p)
-    PREDOWN=yes
-    ;;
-    v)
-    echo "$0: load osm pbf into postgis db"
-    exit 0
-    ;;
-    esac
-done
-shift $((OPTIND - 1))
 
 check_exec
 

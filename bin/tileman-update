@@ -6,11 +6,12 @@
 # osmosis configuration should be in $WORKDIR
 #
 # Licensed in GPLv3
-# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+# Copyright 2013-2014, Hiroshi Miura <miurahr@osmf.jp>
 #
 # ----------------------------
 # ChnageLog
 #
+# 2014-05-26 Support -i option to specify config file
 # 2013-11-03 check strictly command return values
              change osmosis directories
 # 2013-07-02 change command name to tileman-update
@@ -18,8 +19,42 @@
 #
 NAME=tileman-update
 CONF=tileman.conf
-# Read configuration variable file if it is present
-[ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
+
+while getopts "bchi:u" opts; do
+    case $opts in
+    c)
+    CLEAN_FLAG=yes
+    ;;
+    b)
+    CLEAN_OUTOFBB_FLAG=yes
+    ;;
+    h)
+    #show help and exit
+    echo "$0: get osm change file and update postgis db"
+    echo " "
+    echo "It takes addtional options as follows: "
+    echo "'-b': clwan-up out-of-bounding-box ways"
+    echo "'-c': compact size of PostGIS."
+    echo "'-i': configuration file"
+    echo "'-u': launch expire_rended to refresh expired tile"
+    exit 0
+    ;;
+    i)
+    CONF="$OPTARG"
+    ;;
+    u)
+    TILE_UPDATE_FLAG=yes
+    ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+# Read configuration variable file
+if [ ! -r "/etc/${CONF}" ]; then
+    echo "Configuration file is not found: ${CONF}"
+    exit 1
+fi
+. "/etc/${CONF}"
 
 WORKDIR=${WORKDIR_OSM:=/var/lib/osmosis}
 DBUSER=${DBUSER:=osm}
@@ -85,42 +120,6 @@ function check_exec () {
      exit 1
   fi
 }
-
-
-while getopts "bcdhuv" opts; do
-    case $opts in 
-    c)
-    CLEAN_FLAG=yes
-    ;;
-    b)
-    CLEAN_OUTOFBB_FLAG=yes
-    ;;
-    d)
-    DEBUG_FLAG=yes
-    ;;
-    h)
-    #show help and exit
-    echo "$0: get osm change file and update postgis db"
-    echo " "
-    echo "It takes addtional options as follows: "
-    echo "'-b': clwan-up out-of-bounding-box ways"
-    echo "'-c': compact size of PostGIS."
-    echo "'-d': show debug messages"
-    echo "'-u': launch expire_rended to refresh expired tile"
-    echo "'-v': show version"
-    exit 0
-    ;;
-    v)
-    echo "$0: get osm change file and update postgis db"
-    exit 0
-    ;;
-    u)
-    TILE_UPDATE_FLAG=yes
-    ;;
-    esac
-done
-shift $((OPTIND - 1))
-
 
 check_exec
 if [ "${TILE_UPDATE_FLAG}" = "yes" ]; then
