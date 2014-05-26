@@ -94,5 +94,4 @@ For details, please refer doc/statictile.ja.txt
 
 
 
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/osmfj/tileman/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
 
