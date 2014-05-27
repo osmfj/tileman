@@ -20,11 +20,11 @@ before_install:
   - "sudo osmosis/osmosis-installer.sh"
 #
 install:
-  - "make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis install"
+  - "sudo make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis install"
 #
 # command to run tests
 script:
-  - "make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis travis_test_install"
-  - "make test_service_start"
+  - "sudo make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis travis_test_install"
+  - "sudo make test_service_start"
   - "make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis test"
 
