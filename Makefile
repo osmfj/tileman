@@ -30,7 +30,7 @@ install: directories nginx_$(DISTRO) utils osmosis statictiles
 
 directories:
 	mkdir -p $(DESTDIR)
-	mkdir -p $(OSMOSIS_WORK)
+	mkdir -p $(WORKDIR)
 	mkdir -p $(HTMLDIR)
 	mkdir -p $(CACHEDIR)
 	chmod 777 $(CACHEDIR)
