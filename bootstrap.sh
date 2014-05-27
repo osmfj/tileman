@@ -8,13 +8,6 @@ useradd osm
 
 export DEBIAN_FRONTEND=noninteractive
 
-# use Apt-cacher on host
-#
-# if you use apt-cacher on host to reduce downloding time,
-# please remove comment out -- recoomend.
-
-#echo 'Acquire::http::Proxy "http://192.168.123.1:3142";' >> /etc/apt/apt.conf.d/01tileman
-
 # don't install recommend packages to reduce size
 #echo 'APT::Install-Recommends "0"; \
 #      APT::Install-Suggests "0";' >> /etc/apt/apt-conf.d/01tileman
