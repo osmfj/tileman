@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 
 # Test preparation script
-ROOTDIR=/vagrant
+TESTDIR=/vagrant/test
+DBUSER=osm
 
 # setup postgis database
 su postgres -c /usr/bin/tileman-create
@@ -13,6 +14,6 @@ echo  PROCESS_NUM=1　>> /etc/tileman.conf
 echo  WORKDIR_OSM=/var/lib/osmosis >> /etc/tileman.conf
 echo  OSMOSIS_BIN=/usr/bin/osmosis >> /etc/tileman.conf
 
-cp -p ${ROOTDIR}/test/taiwan-latest.osm.pbf /tmp
-cp -p ${ROOTDIR}/test/state.txt /tmp
-(cd /tmp;su osm -c /usr/bin/tileman-load)
+cp -p ${TESTDIR}/taiwan-latest.osm.pbf /tmp
+cp -p ${TESTDIR}/state.txt /tmp
+(cd /tmp;su ${DBUSER} -c /usr/bin/tileman-load -p )

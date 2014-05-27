@@ -74,6 +74,9 @@ test_install: test_install_$(DISTRO)
 test_install_debian:
 	sudo test/test_install.sh
 
+travis_test_install:
+  sudo test/travis_test_install.sh
+
 test_install_redhat:
 
 test_service_start:
