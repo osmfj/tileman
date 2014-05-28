@@ -2,7 +2,7 @@
 # makefile
 #
 # Distro detection
-DISTRO_ID=`lsb-release -i|cur -f 2`
+DISTRO_ID=`lsb_release -i|cut -f 2`
 ifeq ($(strip $(DISTRO_ID)),'Ubuntu')
 DISTRO=debian
 else ifeq ($(strip $(DISTRO_ID)),'Debian')
@@ -40,16 +40,14 @@ statictiles: directories
 	bzcat data/Liancourt_Rocks_lang_ja_tiles.tar.bz2 |(cd $(STATICDIR);tar xf -)
 
 nginx_debian:
-	install nginx/tileproxy_params $(NGINX)/
-	install nginx/common_location_params $(NGINX)/
-	install nginx/ssl_params $(NGINX)/
+	install nginx/tileman_proxy_params $(NGINX)/
+	install nginx/tileman_ssl_params $(NGINX)/
 	install nginx/conf.d/* $(NGINX)/conf.d/
 	install nginx/sites/* $(NGINX)/sites-available/
 
 nginx_redhat:
-	install nginx/tileproxy_params $(NGINX)/
-	install nginx/common_location_params $(NGINX)/
-	install nginx/ssl_params $(NGINX)/
+	install nginx/tileman_proxy_params $(NGINX)/
+	install nginx/tileman_ssl_params $(NGINX)/
 	install nginx/conf.d/tileman.conf $(NGINX)/conf.d/_tileman.conf
 	install nginx/sites/tileman-proxy $(NGINX)/conf.d/tileman-proxy.conf.ex
 	install nginx/sites/tileman-proxy-ssl $(NGINX)/conf.d/tileman-proxy-ssl.conf.ex

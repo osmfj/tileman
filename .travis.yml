@@ -7,9 +7,8 @@ before_script:
   - psql -U postgres -c "create extension postgis"
   - psql -c 'create database gis;' -U postgres
 before_install:
-  - "sudo useradd osm"
   - "sudo apt-get update -qq"
-  - "sudo apt-get install -qq python-software-properties"
+  - "sudo apt-get install -qq python-software-properties lsb-release"
   - "sudo apt-add-repository -y ppa:osmjapan/ppa"
   - "sudo apt-get update -qq"
   - "sudo apt-get install -qq nginx-openresty ttf-unifont ttf-dejavu ttf-dejavu-core ttf-dejavu-extra"
@@ -18,13 +17,11 @@ before_install:
   - "sudo apt-get install -qq libjs-leaflet"
   - "sudo apt-get install -qq --no-install-recommends openstreetmap-mapnik-stylesheet-data"
   - "sudo osmosis/osmosis-installer.sh"
-#
 install:
   - "sudo make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis install"
-#
+  - "sudo make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis travis_test_install"
 # command to run tests
 script:
-  - "sudo make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis travis_test_install"
   - "sudo make test_service_start"
   - "make PREFIX=/usr HTMLDIR=/var/www CONFDIR=/etc CACHEDIR=/var/cache/tileman STATICDIR=/var/lib/tileman/tiles WORKDIR=/var/lib/osmosis test"
 
