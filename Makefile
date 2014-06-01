@@ -14,13 +14,13 @@ DISTRO=redhat
 endif
 
 PREFIX   ?=	/opt/tileman
-DESTDIR  ?=	${PREFIX}/bin/
-HTMLDIR  ?=	${PREFIX}/html/
-CACHEDIR ?=	${PREFIX}/cache/
-STATICDIR?=	${PREFIX}/tiles/
-CONFDIR  ?=	${PREFIX}/etc/
-NGINX    ?=	${CONFDIR}/nginx
-WORKDIR  ?=	${PREFIX}/osmosis
+DESTDIR  ?=	$(PREFIX)/bin/
+HTMLDIR  ?=	$(PREFIX)/html/
+CACHEDIR ?=	$(PREFIX)/cache/
+STATICDIR?=	$(PREFIX)/tiles/
+CONFDIR  ?=	$(PREFIX)/etc/
+NGINX    ?=	$(CONFDIR)/nginx
+WORKDIR  ?=	$(PREFIX)/osmosis
 
 .PHONY: install test test_install test_service_start test_db_load
 
@@ -68,12 +68,18 @@ test_debian:
 test_redhat:
 
 travis_test_install:
-	sudo test/travis_test_install.sh
+	sudo env PREFIX=$(PREFIX) DESTDIR=$(DESTDIR) HTMLDIR=$(HTMLDIR) \
+	CACHEDIR=$(CACHEDIR) STATICDIR=$(STATICDIR) CONFDIR=$(CONFDIR) \
+	NGINX=$(NGINX) WORKDIR=$(WORKDIR) \
+	test/travis_test_install.sh
 
 test_install: test_install_$(DISTRO)
 
 test_install_debian:
-	sudo test/test_install.sh
+	sudo env PREFIX=$(PREFIX) DESTDIR=$(DESTDIR) HTMLDIR=$(HTMLDIR) \
+	CACHEDIR=$(CACHEDIR) STATICDIR=$(STATICDIR) CONFDIR=$(CONFDIR) \
+	NGINX=$(NGINX) WORKDIR=$(WORKDIR) \
+	test/test_install.sh
 
 test_install_redhat:
 
@@ -83,4 +89,7 @@ test_service_start:
 	sudo service nginx start
 
 test_dbload:
-	sudo test/load.sh
+	sudo env PREFIX=$(PREFIX) DESTDIR=$(DESTDIR) HTMLDIR=$(HTMLDIR) \
+	CACHEDIR=$(CACHEDIR) STATICDIR=$(STATICDIR) CONFDIR=$(CONFDIR) \
+	NGINX=$(NGINX) WORKDIR=$(WORKDIR) \
+	test/load.sh

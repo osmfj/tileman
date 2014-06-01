@@ -1,15 +1,15 @@
-#!/bin/sh
+#!/bin/bash
 
-PREFIX   ?= /opt/tileman
-DESTDIR  ?= ${PREFIX}/bin/
-HTMLDIR  ?= ${PREFIX}/html/
-CACHEDIR ?= ${PREFIX}/cache/
-STATICDIR?= ${PREFIX}/tiles/
-CONFDIR  ?= ${PREFIX}/etc/
-NGINX    ?= ${CONFDIR}/nginx
-WORKDIR  ?= ${PREFIX}/osmosis
-HTMLDIR  ?= ${PREFIX}/www
-SRCROOT  ?= `pwd`
+PREFIX   := /opt/tileman
+DESTDIR  := ${PREFIX}/bin/
+HTMLDIR  := ${PREFIX}/html/
+CACHEDIR := ${PREFIX}/cache/
+STATICDIR:= ${PREFIX}/tiles/
+CONFDIR  := ${PREFIX}/etc/
+NGINX    := ${CONFDIR}/nginx
+WORKDIR  := ${PREFIX}/osmosis
+HTMLDIR  := ${PREFIX}/www
+SRCROOT  := `pwd`
 
 cp ${SRCROOT}/osmosis/fabrik.txt $(WORKDIR)/configuration.txt
 mkdir -p ${HTMLDIR}
