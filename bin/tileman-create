@@ -6,11 +6,12 @@
 # osmosis configuration should be in $WORKER_DIR
 #
 # Licensed in GPLv3
-# Copyright 2013, Hiroshi Miura <miurahr@osmf.jp>
+# Copyright 2013-2014, Hiroshi Miura <miurahr@osmf.jp>
 #
 # ----------------------------
 # ChnageLog
 #
+# 2014-05-26 Support -i option to specify config file
 # 2013-11-03 Fix to support UTF8
 #            Fix hstore error
 # 2013-07-17 postgres/postgis version change
@@ -18,9 +19,32 @@
 # ----------------------------
 #
 NAME=tileman-create
-CONF=tileman.conf
-# Read configuration variable file if it is present
-[ -r "/etc/${CONF}" ] && . "/etc/${CONF}"
+CONF=/etc/tileman.conf
+
+while getopts "hi:" opts; do
+    case $opts in
+    h)
+    #show help and exit
+    echo "$0: create postgis db for osm"
+    echo " "
+    echo "It takes addtional options as follows: "
+    echo "'-h': show help"
+    echo "'-i': specify configuration file"
+    exit 0
+    ;;
+    i)
+    CONF="$OPTARG"
+    ;;
+    esac
+done
+shift $((OPTIND - 1))
+
+# Read configuration variable file
+if [ ! -r "${CONF}" ]; then
+    echo "Configuration file is not found: ${CONF}"
+    exit 1
+fi
+. "${CONF}"
 
 DBUSER=${DBUSER:=osm}
 DBNAME=${DBNAME:=gis}
