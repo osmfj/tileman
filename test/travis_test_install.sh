@@ -17,4 +17,4 @@ mkdir -p ${HTMLDIR}
 cp ${SRCROOT}/test/example.html ${HTMLDIR}/index.html
 cp ${SRCROOT}/test/tirex_mapnik_custom.conf ${CONFDIR}/tirex/renderer/mapnik/custom.conf
 cp ${SRCROOT}/test/tileman-test ${CONFDIR}/nginx/sites-enabled/tileman-test
-/usr/bin/python ${SRCROOT}/test/mapnik_stylesheets_generate_xml.py /etc/mapnik-osm-data/osm.xml /etc/mapnik-osm-data/custom.xml --dbname gis --user postgres
+/usr/bin/python ${SRCROOT}/test/mapnik_stylesheets_generate_xml.py ${SRCROOT}/test/osm.xml /etc/mapnik-osm-data/custom.xml --dbname gis --user postgres
