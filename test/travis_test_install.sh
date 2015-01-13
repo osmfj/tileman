@@ -1,17 +1,18 @@
 #!/bin/bash
 
-PREFIX   := /opt/tileman
-DESTDIR  := ${PREFIX}/bin/
-HTMLDIR  := ${PREFIX}/html/
-CACHEDIR := ${PREFIX}/cache/
-STATICDIR:= ${PREFIX}/tiles/
-CONFDIR  := ${PREFIX}/etc/
-NGINX    := ${CONFDIR}/nginx
-WORKDIR  := ${PREFIX}/osmosis
-HTMLDIR  := ${PREFIX}/www
-SRCROOT  := `pwd`
+PREFIX=${PREFIX:-/opt/tileman}
+DESTDIR=${DESTDIR:-${PREFIX}/bin/}
+SHAREDIR=${SHAREDIR:-/opt/tileman/share}
+VARDIR=${VARDIR:-/opt/tileman/var}
+HTMLDIR=${HTMLDIR:-${SHAREDIR}/html/}
+CACHEDIR=${CACHEDIR:-${VARDIR}/cache/}
+STATICDIR=${STATICDIR:-${VARDIR}/tiles/}
+CONFDIR=${CONFDIR:-${PREFIX}/etc/}
+NGINX=${NGINX:-${CONFDIR}/nginx}
+WORKDIR=${WORKDIR:-${VARDIR}/osmosis}
+SRCROOT=${SRCROOT:-`pwd`}
 
-cp ${SRCROOT}/osmosis/fabrik.txt $(WORKDIR)/configuration.txt
+cp ${SRCROOT}/osmosis/fabrik.txt ${WORKDIR}/configuration.txt
 mkdir -p ${HTMLDIR}
 cp ${SRCROOT}/test/example.html ${HTMLDIR}/index.html
 cp ${SRCROOT}/test/tirex_mapnik_custom.conf ${CONFDIR}/tirex/renderer/mapnik/custom.conf
