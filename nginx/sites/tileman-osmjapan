@@ -22,6 +22,10 @@ server {
      access_log off;
   }
 
+  location /toomany.png {
+    root /opt/tileman/img;
+  }
+
   location / {
     access_by_lua '
       local osm_tile = require "osm.tile"
@@ -36,6 +40,11 @@ server {
         ngx.exec("@tileserver")
       end
     ';
+
+    limit_req zone=tile_req burst=48;
+    limit_req_status 429;
+    error_page 429 /toomany.png;
+
     root /opt/tileman/tiles;
     try_files $uri $uri/ @tileserver;
   }

@@ -26,7 +26,7 @@ WORKDIR  ?=	${PREFIX}/osmosis
 
 all:
 
-install: directories nginx_$(DISTRO) utils osmosis statictiles
+install: directories nginx_$(DISTRO) utils osmosis statictiles errorimg
 
 directories:
 	mkdir -p $(DESTDIR)
@@ -38,6 +38,9 @@ directories:
 
 statictiles: directories
 	bzcat data/Liancourt_Rocks_lang_ja_tiles.tar.bz2 |(cd $(STATICDIR);tar xf -)
+
+errorimg: directories
+	cp data/toomany.png $(HTMLDIR)
 
 nginx_debian:
 	install nginx/tileproxy_params $(NGINX)/
