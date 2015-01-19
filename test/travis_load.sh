@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 
 # Test preparation script
-TESTDIR=/vagrant/test
-DBUSER=osm
+TESTDIR=test
+DBUSER=postgres
 
 # setup postgis database
-su postgres -c /usr/bin/tileman-create
+sudo -u ${DBUSER} /usr/bin/tileman-create
 
 # default test data is taiwan (about 16MB by .pbf)
 echo  COUNTRY=taiwan >> /etc/tileman.conf
@@ -16,4 +16,4 @@ echo  OSMOSIS_BIN=/usr/bin/osmosis >> /etc/tileman.conf
 
 cp -p ${TESTDIR}/taiwan-latest.osm.pbf /tmp
 cp -p ${TESTDIR}/state.txt /tmp
-(cd /tmp;su ${DBUSER} -c /usr/bin/tileman-load -p )
+(cd /tmp;sudo -u ${DBUSER} /usr/bin/tileman-load -p )

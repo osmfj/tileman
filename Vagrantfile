@@ -23,7 +23,11 @@ Vagrant.configure("2") do |config|
   config.vm.provider :kvm do |kvm, override| 
     kvm.gui = true
     override.vm.box     = "precise64"
-    override.vm.box_url = "https://s3-ap-northeast-1.amazonaws.com/miurahr-public/precise64-kvm.box"
+    override.vm.box_url = "https://vagrant-kvm-boxes.s3.amazonaws.com/precise64-kvm.box"
+  end
+
+  if Vagrant.has_plugin?("vagrant-cachier")
+    config.cache.auto_detect = true
   end
 
   # Create a forwarded port mapping which allows access to a specific port
