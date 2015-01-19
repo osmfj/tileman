@@ -6,6 +6,10 @@ server {
 
   include tileman_ssl_params;
 
+  location /toomany.png {
+    root /opt/tileman/img;
+  }
+
   location / {
     access_by_lua '
       local osm_tile = require "osm.tile"
@@ -17,6 +21,11 @@ server {
         ngx.exit(ngx.HTTP_FORBIDDEN)
       end
     ';
+
+    limit_req zone=tile_req burst=48 nodelay;
+    limit_req_status 429;
+    error_page 429 /toomany.png;
+
     include tileman_proxy_params;
     proxy_set_header X_FORWARDED_PROTO http;
     proxy_pass http://openstreetmap_backend;
